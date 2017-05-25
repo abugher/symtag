@@ -1,0 +1,34 @@
+#!/bin/bash
+
+test -f ~/.bashrc && . ~/.bashrc
+
+SYMTAGRC=~/.symtagrc
+ARGUMENTS='--norc --noprofile'
+COMMANDS=''
+
+while test $# -gt 0; do
+  case $1 in
+    -c|--config|--rc)
+      SYMTAGRC=$2
+      shift
+    ;;
+    -*)
+      exit 1
+    ;;
+    *)
+      ARGUMENTS="${ARGUMENTS} -c '${*}'"
+      while shift; do true; done
+    ;;
+  esac
+  shift
+done
+
+SYMTAGDIR=~/.symtag
+PS1='[symtag] '
+
+test -f $SYMTAGRC && . $SYMTAGRC
+
+export PS1
+
+COMMAND_LINE="bash ${ARGUMENTS}"
+eval $COMMAND_LINE
