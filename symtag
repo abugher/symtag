@@ -17,11 +17,11 @@ TARGETS=()
 TAGS=()
 while test $# -gt 0; do
   case $1 in
-    -f)
+    -f|--file)
       FILES+=($2)
       shift
       ;;
-    -t)
+    -t|--tag)
       TAGS+=($2)
       shift
       ;;
@@ -45,4 +45,9 @@ SYMTAGDIR=~/.symtag
 test -f $SYMTAGRC && . $SYMTAGRC
 
 mkdir -p $SYMTAGDIR/{tags,names,files}  || fail
+
+
+
 cd $SYMTAGDIR                           || fail
+
+
