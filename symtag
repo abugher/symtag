@@ -55,10 +55,18 @@ mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 for F in "${FILES[@]}"; do 
   HASH=$(sha256sum "${F}" | { read HASH PATH; echo $HASH; }) || fail
   NAME=$(echo "${F}" | sed 's#^.*/##g') || fail
-  test -e "${SYMTAGDIR}/files/${HASH}" ||
+  test -e "${SYMTAGDIR}/files/${HASH}" || {
+    test -h "${SYMTAGDIR}/files/${HASH}" && {
+      rm "${SYMTAGDIR}/files/${HASH}" || fail
+    }
     ln -s "$(realpath --relative-to "${SYMTAGDIR}/tags/" "${F}")" "${SYMTAGDIR}/files/${HASH}" || fail
-  test -e "${SYMTAGDIR}/names/${NAME}" ||
+  }
+  test -e "${SYMTAGDIR}/names/${NAME}" || {
+    test -h "${SYMTAGDIR}/names/${NAME}" && {
+      rm "${SYMTAGDIR}/names/${NAME}" || fail
+    }
     ln -s "../files/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
+  }
 done
 unset HASH
 
