@@ -15,11 +15,15 @@ COMMANDS=''
 
 TARGETS=()
 TAGS=()
+NAMES=()
 while test $# -gt 0; do
   case $1 in
     -f|--file)
       FILES+=($2)
       shift
+      ;;
+    -n|--name)
+      NAMES+=($2)
       ;;
     -t|--tag)
       TAGS+=($2)
@@ -42,12 +46,33 @@ done
 
 SYMTAGDIR=~/.symtag
 
-test -f $SYMTAGRC && . $SYMTAGRC
+test -f $SYMTAGRC && {
+  . "${SYMTAGRC}" || fail
+}
 
-mkdir -p $SYMTAGDIR/{tags,names,files}  || fail
+mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 
+for F in "${FILES[@]}"; do 
+  HASH=$(sha256sum "${F}" | { read HASH PATH; echo $HASH; }) || fail
+  NAME=$(echo "${F}" | sed 's#^.*/##g') || fail
+  test -e "${SYMTAGDIR}/files/${HASH}" ||
+    ln -s "$(realpath --relative-to "${SYMTAGDIR}/tags/" "${F}")" "${SYMTAGDIR}/files/${HASH}" || fail
+  test -e "${SYMTAGDIR}/names/${NAME}" ||
+    ln -s "../files/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
+done
+unset HASH
 
-
-cd $SYMTAGDIR                           || fail
-
-
+for N in "${NAMES[@]}"; do
+  test -h "${SYMTAGDIR}/names/${N}" && {
+    HASH=$(readlink "${SYMTAGDIR}/names/${N}" | sed 's#^.*/##g') || fail
+    for T in "${TAGS[@]}"; do
+      mkdir -p "${SYMTAGDIR}/tags/${T}" || fail
+      test -e "${SYMTAGDIR}/tags/${T}/${HASH}" ||
+        test -h "${SYMTAGDIR}/tags/${T}/${HASH}" && {
+          rm "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+        }
+        ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+    done
+  }
+done
+unset HASH
