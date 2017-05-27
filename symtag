@@ -16,30 +16,34 @@ TARGETS=()
 TAGS=()
 NAMES=()
 while test $# -gt 0; do
-  case $1 in
+  case "${1}" in
     -c|--config|--rc)
-      SYMTAGRC=$2
+      SYMTAGRC="${2}"
       shift
       ;;
     -n|--name)
-      NAMES+=($2)
+      NAMES+=("${2}")
       ;;
     -t|--tag)
-      TAGS+=($2)
+      TAGS+=("${2}")
+      shift
+      ;;
+    -q|--query)
+      QUERY="${2}"
       shift
       ;;
     -*)
       exit 1
       ;;
     *)
-      FILES+=($1)
+      FILES+=("${1}")
       true
       ;;
   esac
   shift
 done
 
-test -f $SYMTAGRC && {
+test -f "${SYMTAGRC}" && {
   . "${SYMTAGRC}" || fail
 }
 
@@ -62,7 +66,6 @@ for F in "${FILES[@]}"; do
     ln -s "../files/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
   }
 done
-unset HASH
 
 for N in "${NAMES[@]}"; do
   test -h "${SYMTAGDIR}/names/${N}" && {
@@ -77,4 +80,5 @@ for N in "${NAMES[@]}"; do
     done
   }
 done
-unset HASH
+
+
