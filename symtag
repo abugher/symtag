@@ -17,8 +17,8 @@ TAGS=()
 NAMES=()
 while test $# -gt 0; do
   case $1 in
-    -f|--file)
-      FILES+=($2)
+    -c|--config|--rc)
+      SYMTAGRC=$2
       shift
       ;;
     -n|--name)
@@ -28,15 +28,11 @@ while test $# -gt 0; do
       TAGS+=($2)
       shift
       ;;
-    -c|--config|--rc)
-      SYMTAGRC=$2
-      shift
-      ;;
     -*)
       exit 1
       ;;
     *)
-      ARGUMENTS+=($1)
+      FILES+=($1)
       true
       ;;
   esac
