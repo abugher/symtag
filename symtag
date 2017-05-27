@@ -15,6 +15,10 @@ SYMTAGDIR=~/.symtag
 TARGETS=()
 TAGS=()
 NAMES=()
+RESULTS=()
+
+MODE=OR
+
 while test $# -gt 0; do
   case "${1}" in
     -c|--config|--rc)
@@ -81,4 +85,59 @@ for N in "${NAMES[@]}"; do
   }
 done
 
+for Q in $QUERY; do
+  case "${Q}" in
+    AND|OR|NOT)
+      MODE="${Q}"
+      continue
+      ;;
+    *)
+      TAG_RESULTS=( $(ls "${SYMTAGDIR}/tags/${Q}/") )
+      case "${MODE}" in
+        OR)
+          RESULTS+=("${TAG_RESULTS[@]}")
+          ;;
+        AND)
+          NEW_RESULTS=()
+          for R in "${RESULTS[@]}"; do
+            for TR in "${TAG_RESULTS[@]}"; do
+              if test "${R}" == "${TR}"; then
+                NEW_RESULTS+=("${R}")
+              fi
+            done
+          done
+          RESULTS=( "${NEW_RESULTS[@]}" )
+          ;;
+        NOT)
+          NEW_RESULTS=()
+          for R in "${RESULTS[@]}"; do
+            MATCH=no
+            for TR in "${TAG_RESULTS[@]}"; do
+              if test "${R}" == "${TR}"; then
+                MATCH=yes
+              fi
+            done
+            if test "${MATCH}" == no; then
+              NEW_RESULTS+=( "${R}" )
+            fi
+          done
+          RESULTS=( "${NEW_RESULTS[@]}" )
+          ;;
+        *)
+          fail
+          ;;
+      esac
+      ;;
+  esac
+done
+
+for R in "${RESULTS[@]}"; do
+  ALL_NAMES=( $(ls "${SYMTAGDIR}/names/") )
+  for N in "${ALL_NAMES[@]}"; do
+    DEST=$(readlink "${SYMTAGDIR}/names/${N}" | sed 's#^.*/##g')
+    if test "${DEST}" == "${R}"; then
+      echo "${N}"
+    fi
+  done
+done
 
