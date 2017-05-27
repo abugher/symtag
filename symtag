@@ -10,8 +10,8 @@ shopt -s expand_aliases
 alias fail='{ echo $LINENO; exit 1; }'
 
 SYMTAGRC=~/.symtagrc
+SYMTAGDIR=~/.symtag
 ARGUMENTS='--norc --noprofile'
-COMMANDS=''
 
 TARGETS=()
 TAGS=()
@@ -43,8 +43,6 @@ while test $# -gt 0; do
   esac
   shift
 done
-
-SYMTAGDIR=~/.symtag
 
 test -f $SYMTAGRC && {
   . "${SYMTAGRC}" || fail
