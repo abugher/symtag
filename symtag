@@ -52,6 +52,7 @@ mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 for F in "${FILES[@]}"; do 
   HASH=$(sha256sum "${F}" | { read HASH PATH; echo $HASH; }) || fail
   NAME=$(echo "${F}" | sed 's#^.*/##g') || fail
+  NAMES+=($NAME)
   test -e "${SYMTAGDIR}/files/${HASH}" || {
     test -h "${SYMTAGDIR}/files/${HASH}" && {
       rm "${SYMTAGDIR}/files/${HASH}" || fail
