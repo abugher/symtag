@@ -6,13 +6,16 @@
 # published by Sam Hocevar. See WTFPL.txt or http://www.wtfpl.net/ for more
 # details.
 
+shopt -s expand_aliases
+alias fail='{ echo $LINENO; exit 1; }'
+
 
 function link_file {
   test -e "${SYMTAGDIR}/files/${HASH}" || {
     test -h "${SYMTAGDIR}/files/${HASH}" && {
       rm "${SYMTAGDIR}/files/${HASH}" || fail
     }
-    ln -s "$(realpath --relative-to "${SYMTAGDIR}/files/" "${F}")" "${SYMTAGDIR}/files/${HASH}" || fail
+    ln -s "$(realpath --relative-to "${SYMTAGDIR}/files/" "${FILE}" || fail )" "${SYMTAGDIR}/files/${HASH}" || fail
   }
 }
 
@@ -28,11 +31,11 @@ function name_file {
 
 
 function tag_file {
-  mkdir -p "${SYMTAGDIR}/tags/${T}" || fail
-  test -h "${SYMTAGDIR}/tags/${T}/${HASH}" && {
-    rm "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+  mkdir -p "${SYMTAGDIR}/tags/${TAG}" || fail
+  test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}" && {
+    rm "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
   }
-  ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+  ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
 }
 
 
@@ -43,10 +46,10 @@ function boolean_or {
 
 function boolean_and {
   NEW_RESULTS=()
-  for R in "${RESULTS[@]}"; do
-    for TR in "${TAGGED_FILES[@]}"; do
-      if test "${R}" == "${TR}"; then
-        NEW_RESULTS+=("${R}")
+  for RESULT in "${RESULTS[@]}"; do
+    for TAGGED_FILE in "${TAGGED_FILES[@]}"; do
+      if test "${RESULT}" == "${TAGGED_FILE}"; then
+        NEW_RESULTS+=("${RESULT}")
       fi
     done
   done
@@ -56,15 +59,15 @@ function boolean_and {
 
 function boolean_not {
   NEW_RESULTS=()
-  for R in "${RESULTS[@]}"; do
+  for RESULT in "${RESULTS[@]}"; do
     MATCH=no
-    for TR in "${TAGGED_FILES[@]}"; do
-      if test "${R}" == "${TR}"; then
+    for TAGGED_FILE in "${TAGGED_FILES[@]}"; do
+      if test "${RESULT}" == "${TAGGED_FILE}"; then
         MATCH=yes
       fi
     done
     if test "${MATCH}" == no; then
-      NEW_RESULTS+=( "${R}" )
+      NEW_RESULTS+=( "${RESULT}" )
     fi
   done
   RESULTS=( "${NEW_RESULTS[@]}" )
@@ -72,20 +75,17 @@ function boolean_not {
 
 
 function output_names {
-  for R in "${RESULTS[@]}"; do
+  for RESULT in "${RESULTS[@]}"; do
     ALL_NAMES=( $(ls "${SYMTAGDIR}/names/") )
-    for N in "${ALL_NAMES[@]}"; do
-      DEST=$(readlink "${SYMTAGDIR}/names/${N}" | sed 's#^.*/##g')
-      if test "${DEST}" == "${R}"; then
-        echo "${N}"
+    for NAME in "${ALL_NAMES[@]}"; do
+      DEST=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g')
+      if test "${DEST}" == "${RESULT}"; then
+        echo "${NAME}"
       fi
     done
   done
 }
 
-
-shopt -s expand_aliases
-alias fail='{ echo $LINENO; exit 1; }'
 
 SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
@@ -131,31 +131,31 @@ test -f "${SYMTAGRC}" && {
 
 mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 
-for F in "${FILES[@]}"; do 
-  HASH=$(sha256sum "${F}" | { read HASH PATH; echo $HASH; }) || fail
-  NAME=$(echo "${F}" | sed 's#^.*/##g') || fail
+for FILE in "${FILES[@]}"; do 
+  HASH=$(sha256sum "${FILE}" | { read HASH PATH; echo $HASH; }) || fail
+  NAME=$(echo "${FILE}" | sed 's#^.*/##g') || fail
   NAMES+=($NAME)
   link_file
   name_file
 done
 
-for N in "${NAMES[@]}"; do
-  test -h "${SYMTAGDIR}/names/${N}" && {
-    HASH=$(readlink "${SYMTAGDIR}/names/${N}" | sed 's#^.*/##g') || fail
-    for T in "${TAGS[@]}"; do
+for NAME in "${NAMES[@]}"; do
+  test -h "${SYMTAGDIR}/names/${NAME}" && {
+    HASH=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g') || fail
+    for TAG in "${TAGS[@]}"; do
       tag_file
     done
   }
 done
 
-for Q in $QUERY; do
-  case "${Q}" in
+for ELEMENT in $QUERY; do
+  case "${ELEMENT}" in
     AND|OR|NOT)
-      MODE="${Q}"
+      MODE="${ELEMENT}"
       continue
       ;;
     *)
-      TAGGED_FILES=( $(test -d "${SYMTAGDIR}/tags/${Q}/" && ls "${SYMTAGDIR}/tags/${Q}/") )
+      TAGGED_FILES=( $(test -d "${SYMTAGDIR}/tags/${ELEMENT}/" && ls "${SYMTAGDIR}/tags/${ELEMENT}/") )
       case "${MODE}" in
         OR)
           boolean_or
