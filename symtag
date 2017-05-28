@@ -37,7 +37,7 @@ while test $# -gt 0; do
       shift
       ;;
     -*)
-      exit 1
+      fail
       ;;
     *)
       FILES+=("${1}")
@@ -77,7 +77,9 @@ for N in "${NAMES[@]}"; do
     for T in "${TAGS[@]}"; do
       mkdir -p "${SYMTAGDIR}/tags/${T}" || fail
       test -e "${SYMTAGDIR}/tags/${T}/${HASH}" ||
+        echo "debug:  does not exist:  ${SYMTAGDIR}/tags/${T}/${HASH}"
         test -h "${SYMTAGDIR}/tags/${T}/${HASH}" && {
+          echo "debug:  is symlink:  ${SYMTAGDIR}/tags/${T}/${HASH}"
           rm "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
         }
         ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
