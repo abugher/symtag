@@ -78,9 +78,22 @@ function output_names {
   ALL_NAMES=( $(ls "${SYMTAGDIR}/names/") )
   for RESULT in "${RESULTS[@]}"; do
     for NAME in "${ALL_NAMES[@]}"; do
-      DEST=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g')
-      if test "${DEST}" == "${RESULT}"; then
-        echo "${NAME}"
+      FILE=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g')
+      if test "${FILE}" == "${RESULT}"; then
+        case "${OUTPUT}" in
+          name)
+            echo "${NAME}"
+            ;;
+          file)
+            echo "${FILE}"
+            ;;
+          link)
+            echo "${SYMTAGDIR}/names/${NAME}"
+            ;;
+          *)
+            fail
+            ;;
+        esac
       fi
     done
   done
