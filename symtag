@@ -11,32 +11,32 @@ alias fail='{ echo $LINENO; exit 1; }'
 alias unpath="sed 's#^.*/##g'"
 
 
-function link_file {
-  test -e "${SYMTAGDIR}/files/${HASH}" || {
-    test -h "${SYMTAGDIR}/files/${HASH}" && {
-      rm "${SYMTAGDIR}/files/${HASH}" || fail
+function link_hash_to_file {
+  test -e "${SYMTAGDIR}/hashes/${HASH}" || {
+    test -h "${SYMTAGDIR}/hashes/${HASH}" && {
+      rm "${SYMTAGDIR}/hashes/${HASH}" || fail
     }
-    ln -s "$(realpath --relative-to "${SYMTAGDIR}/files/" "${FILE}" || fail )" "${SYMTAGDIR}/files/${HASH}" || fail
+    ln -s "$(realpath --relative-to "${SYMTAGDIR}/hashes/" "${FILE}" || fail )" "${SYMTAGDIR}/hashes/${HASH}" || fail
   }
 }
 
 
-function name_file {
+function link_name_to_hash {
   test -e "${SYMTAGDIR}/names/${NAME}" || {
     test -h "${SYMTAGDIR}/names/${NAME}" && {
       rm "${SYMTAGDIR}/names/${NAME}" || fail
     }
-    ln -s "../files/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
+    ln -s "../hashes/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
   }
 }
 
 
-function tag_file {
+function link_tag_to_hash {
   mkdir -p "${SYMTAGDIR}/tags/${TAG}" || fail
   test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}" && {
     rm "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
   }
-  ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
+  ln -s "../../hashes/${HASH}" "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
 }
 
 
@@ -78,14 +78,17 @@ function boolean_not {
 function output_names {
 
   NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
-  shopt -s nullglob
+  shopt -s nullglob || fail
   ALL_NAMES=( "${SYMTAGDIR}/names/"* )
+  test 'off' == "${NULLGLOB}" && {
+    shopt -u nullglob || fail
+  }
+
   i=0
   while test "${i}" -lt "${#ALL_NAMES[@]}"; do
     ALL_NAMES["${i}"]="$( echo "${ALL_NAMES[$i]}" | unpath )"
     i=$(( "${i}" + 1 ))
   done
-  test 'off' == "${NULLGLOB}" && shopt -u nullglob
 
   for RESULT in "${RESULTS[@]}"; do
     for NAME in "${ALL_NAMES[@]}"; do
@@ -96,7 +99,7 @@ function output_names {
             echo "${HASH}"
             ;;
           file)
-            readlink "${SYMTAGDIR}/files/${HASH}"
+            readlink "${SYMTAGDIR}/hashes/${HASH}"
             ;;
           link)
             echo "${SYMTAGDIR}/names/${NAME}"
@@ -106,7 +109,7 @@ function output_names {
             ;;
           *)
             echo -n "${HASH}:  "
-            readlink "${SYMTAGDIR}/files/${HASH}"
+            readlink "${SYMTAGDIR}/hashes/${HASH}"
         esac
       fi
     done
@@ -164,21 +167,21 @@ test -f "${SYMTAGRC}" && {
 ! test '' == "${O_OUTPUT}" &&
   OUTPUT="${O_OUTPUT}"
 
-mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
+mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
 
 for FILE in "${FILES[@]}"; do 
   HASH=$(sha256sum "${FILE}" | { read HASH PATH; echo $HASH; }) || fail
   NAME=$(echo "${FILE}" | unpath) || fail
   NAMES+=($NAME)
-  link_file
-  name_file
+  link_hash_to_file
+  link_name_to_hash
 done
 
 for NAME in "${NAMES[@]}"; do
   test -h "${SYMTAGDIR}/names/${NAME}" && {
     HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)" || fail
     for TAG in "${TAGS[@]}"; do
-      tag_file
+      link_tag_to_hash
     done
   }
 done
