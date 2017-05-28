@@ -101,9 +101,12 @@ function output_names {
           link)
             echo "${SYMTAGDIR}/names/${NAME}"
             ;;
-          *)
+          name)
             echo "${NAME}"
             ;;
+          *)
+            echo -n "${HASH}:  "
+            readlink "${SYMTAGDIR}/files/${HASH}"
         esac
       fi
     done
@@ -113,7 +116,7 @@ function output_names {
 
 SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
-OUTPUT=file
+OUTPUT=default
 
 TARGETS=()
 TAGS=()
