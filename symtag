@@ -53,36 +53,49 @@ test -f "${SYMTAGRC}" && {
 
 mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 
-for F in "${FILES[@]}"; do 
-  HASH=$(sha256sum "${F}" | { read HASH PATH; echo $HASH; }) || fail
-  NAME=$(echo "${F}" | sed 's#^.*/##g') || fail
-  NAMES+=($NAME)
+
+function link_file {
   test -e "${SYMTAGDIR}/files/${HASH}" || {
     test -h "${SYMTAGDIR}/files/${HASH}" && {
       rm "${SYMTAGDIR}/files/${HASH}" || fail
     }
-    ln -s "$(realpath --relative-to "${SYMTAGDIR}/tags/" "${F}")" "${SYMTAGDIR}/files/${HASH}" || fail
+    ln -s "$(realpath --relative-to "${SYMTAGDIR}/files/" "${F}")" "${SYMTAGDIR}/files/${HASH}" || fail
   }
+}
+
+
+function name_file {
   test -e "${SYMTAGDIR}/names/${NAME}" || {
     test -h "${SYMTAGDIR}/names/${NAME}" && {
       rm "${SYMTAGDIR}/names/${NAME}" || fail
     }
     ln -s "../files/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
   }
+}
+
+
+function tag_file {
+  mkdir -p "${SYMTAGDIR}/tags/${T}" || fail
+  test -h "${SYMTAGDIR}/tags/${T}/${HASH}" && {
+    rm "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+  }
+  ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+}
+
+
+for F in "${FILES[@]}"; do 
+  HASH=$(sha256sum "${F}" | { read HASH PATH; echo $HASH; }) || fail
+  NAME=$(echo "${F}" | sed 's#^.*/##g') || fail
+  NAMES+=($NAME)
+  link_file
+  name_file
 done
 
 for N in "${NAMES[@]}"; do
   test -h "${SYMTAGDIR}/names/${N}" && {
     HASH=$(readlink "${SYMTAGDIR}/names/${N}" | sed 's#^.*/##g') || fail
     for T in "${TAGS[@]}"; do
-      mkdir -p "${SYMTAGDIR}/tags/${T}" || fail
-      test -e "${SYMTAGDIR}/tags/${T}/${HASH}" ||
-        echo "debug:  does not exist:  ${SYMTAGDIR}/tags/${T}/${HASH}"
-        test -h "${SYMTAGDIR}/tags/${T}/${HASH}" && {
-          echo "debug:  is symlink:  ${SYMTAGDIR}/tags/${T}/${HASH}"
-          rm "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
-        }
-        ln -s "../../files/${HASH}" "${SYMTAGDIR}/tags/${T}/${HASH}" || fail
+      tag_file
     done
   }
 done
