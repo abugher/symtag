@@ -8,6 +8,7 @@
 
 shopt -s expand_aliases
 alias fail='{ echo $LINENO; exit 1; }'
+alias unpath="sed 's#^.*/##g'"
 
 
 function link_file {
@@ -75,11 +76,21 @@ function boolean_not {
 
 
 function output_names {
-  ALL_NAMES=( $(ls "${SYMTAGDIR}/names/") )
+
+  NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
+  shopt -s nullglob
+  ALL_NAMES=( "${SYMTAGDIR}/names/"* )
+  i=0
+  while test "${i}" -lt "${#ALL_NAMES[@]}"; do
+    ALL_NAMES["${i}"]="$( echo "${ALL_NAMES[$i]}" | unpath )"
+    i=$(( "${i}" + 1 ))
+  done
+  test 'off' == "${NULLGLOB}" && shopt -u nullglob
+
   for RESULT in "${RESULTS[@]}"; do
     for NAME in "${ALL_NAMES[@]}"; do
-      HASH=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g')
-      if test "${FILE}" == "${RESULT}"; then
+      HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)"
+      if test "${HASH}" == "${RESULT}"; then
         case "${OUTPUT}" in
           hash)
             echo "${HASH}"
@@ -136,7 +147,7 @@ while test $# -gt 0; do
       fail
       ;;
     *)
-      FILES+=("${1}")
+      FILES+=( "$(echo "${1}" | unpath)")
       true
       ;;
   esac
@@ -154,7 +165,7 @@ mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 
 for FILE in "${FILES[@]}"; do 
   HASH=$(sha256sum "${FILE}" | { read HASH PATH; echo $HASH; }) || fail
-  NAME=$(echo "${FILE}" | sed 's#^.*/##g') || fail
+  NAME=$(echo "${FILE}" | unpath) || fail
   NAMES+=($NAME)
   link_file
   name_file
@@ -162,7 +173,7 @@ done
 
 for NAME in "${NAMES[@]}"; do
   test -h "${SYMTAGDIR}/names/${NAME}" && {
-    HASH=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g') || fail
+    HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)" || fail
     for TAG in "${TAGS[@]}"; do
       tag_file
     done
