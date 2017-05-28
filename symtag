@@ -10,6 +10,67 @@ shopt -s expand_aliases
 alias fail='{ echo $LINENO; exit 1; }'
 alias unpath="sed 's#^.*/##g'"
 
+SYMTAGRC=~/.symtagrc
+SYMTAGDIR=~/.symtag
+OUTPUT=default
+
+TARGETS=()
+TAGS=()
+NAMES=()
+RESULTS=()
+
+MODE=OR
+
+
+function main {
+  mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
+
+  for FILE in "${FILES[@]}"; do 
+    HASH=$(sha256sum "${FILE}" | { read HASH PATH; echo $HASH; }) || fail
+    NAME=$(echo "${FILE}" | unpath) || fail
+    NAMES+=($NAME)
+    link_hash_to_file
+    link_name_to_hash
+  done
+
+  for NAME in "${NAMES[@]}"; do
+    test -h "${SYMTAGDIR}/names/${NAME}" && {
+      HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)" || fail
+      for TAG in "${TAGS[@]}"; do
+        link_tag_to_hash
+      done
+    }
+  done
+
+  for ELEMENT in $QUERY; do
+    case "${ELEMENT}" in
+      AND|OR|NOT)
+        MODE="${ELEMENT}"
+        continue
+        ;;
+      *)
+        TAGGED_FILES=( $(test -d "${SYMTAGDIR}/tags/${ELEMENT}/" && ls "${SYMTAGDIR}/tags/${ELEMENT}/") )
+        case "${MODE}" in
+          OR)
+            boolean_or
+            ;;
+          AND)
+            boolean_and
+            ;;
+          NOT)
+            boolean_not
+            ;;
+          *)
+            fail
+            ;;
+        esac
+        ;;
+    esac
+  done
+
+  output_names
+}
+
 
 function link_hash_to_file {
   test -e "${SYMTAGDIR}/hashes/${HASH}" || {
@@ -117,16 +178,7 @@ function output_names {
 }
 
 
-SYMTAGRC=~/.symtagrc
-SYMTAGDIR=~/.symtag
-OUTPUT=default
 
-TARGETS=()
-TAGS=()
-NAMES=()
-RESULTS=()
-
-MODE=OR
 
 while test $# -gt 0; do
   case "${1}" in
@@ -167,49 +219,4 @@ test -f "${SYMTAGRC}" && {
 ! test '' == "${O_OUTPUT}" &&
   OUTPUT="${O_OUTPUT}"
 
-mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
-
-for FILE in "${FILES[@]}"; do 
-  HASH=$(sha256sum "${FILE}" | { read HASH PATH; echo $HASH; }) || fail
-  NAME=$(echo "${FILE}" | unpath) || fail
-  NAMES+=($NAME)
-  link_hash_to_file
-  link_name_to_hash
-done
-
-for NAME in "${NAMES[@]}"; do
-  test -h "${SYMTAGDIR}/names/${NAME}" && {
-    HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)" || fail
-    for TAG in "${TAGS[@]}"; do
-      link_tag_to_hash
-    done
-  }
-done
-
-for ELEMENT in $QUERY; do
-  case "${ELEMENT}" in
-    AND|OR|NOT)
-      MODE="${ELEMENT}"
-      continue
-      ;;
-    *)
-      TAGGED_FILES=( $(test -d "${SYMTAGDIR}/tags/${ELEMENT}/" && ls "${SYMTAGDIR}/tags/${ELEMENT}/") )
-      case "${MODE}" in
-        OR)
-          boolean_or
-          ;;
-        AND)
-          boolean_and
-          ;;
-        NOT)
-          boolean_not
-          ;;
-        *)
-          fail
-          ;;
-      esac
-      ;;
-  esac
-done
-
-output_names
+main
