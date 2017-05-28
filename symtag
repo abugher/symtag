@@ -202,7 +202,7 @@ while test $# -gt 0; do
       fail
       ;;
     *)
-      FILES+=( "$(echo "${1}" | unpath)")
+      FILES+=( "$(echo "${1}")")
       true
       ;;
   esac
