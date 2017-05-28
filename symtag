@@ -6,22 +6,6 @@
 # published by Sam Hocevar. See WTFPL.txt or http://www.wtfpl.net/ for more
 # details.
 
-shopt -s expand_aliases
-alias fail='{ echo $LINENO; exit 1; }'
-alias unpath="sed 's#^.*/##g'"
-
-SYMTAGRC=~/.symtagrc
-SYMTAGDIR=~/.symtag
-OUTPUT=default
-
-TARGETS=()
-TAGS=()
-NAMES=()
-RESULTS=()
-
-MODE=OR
-
-
 function main {
   mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
 
@@ -178,7 +162,20 @@ function output_names {
 }
 
 
+shopt -s expand_aliases
+alias fail='{ echo $LINENO; exit 1; }'
+alias unpath="sed 's#^.*/##g'"
 
+SYMTAGRC=~/.symtagrc
+SYMTAGDIR=~/.symtag
+OUTPUT=default
+
+TARGETS=()
+TAGS=()
+NAMES=()
+RESULTS=()
+
+MODE=OR
 
 while test $# -gt 0; do
   case "${1}" in
