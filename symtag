@@ -147,7 +147,7 @@ test -f "${SYMTAGRC}" && {
   . "${SYMTAGRC}" || fail
 }
 
-test '' == "${O_OUTPUT}" &&
+! test '' == "${O_OUTPUT}" &&
   OUTPUT="${O_OUTPUT}"
 
 mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
