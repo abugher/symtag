@@ -75,8 +75,8 @@ function boolean_not {
 
 
 function output_names {
+  ALL_NAMES=( $(ls "${SYMTAGDIR}/names/") )
   for RESULT in "${RESULTS[@]}"; do
-    ALL_NAMES=( $(ls "${SYMTAGDIR}/names/") )
     for NAME in "${ALL_NAMES[@]}"; do
       DEST=$(readlink "${SYMTAGDIR}/names/${NAME}" | sed 's#^.*/##g')
       if test "${DEST}" == "${RESULT}"; then
@@ -89,6 +89,7 @@ function output_names {
 
 SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
+OUTPUT=file
 
 TARGETS=()
 TAGS=()
@@ -114,6 +115,10 @@ while test $# -gt 0; do
       QUERY="${2}"
       shift
       ;;
+    -o|--output)
+      O_OUTPUT="${2}"
+      shift
+      ;;
     -*)
       fail
       ;;
@@ -128,6 +133,9 @@ done
 test -f "${SYMTAGRC}" && {
   . "${SYMTAGRC}" || fail
 }
+
+test '' == "${O_OUTPUT}" &&
+  OUTPUT="${O_OUTPUT}"
 
 mkdir -p "${SYMTAGDIR}/"{tags,names,files} || fail
 
