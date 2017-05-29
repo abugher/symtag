@@ -24,19 +24,21 @@ function main {
 function add_files {
   for FILE in "${FILES[@]}"; do 
     HASH=not_found
-    for HASH_LINK in "${SYMTAGDIR}/hashes/"*; do
-      test "$(cd "${SYMTAGDIR}/hashes"; readlink -e "$(readlink "${HASH_LINK}" || fail)")" == "$(readlink -e "${FILE}" || fail)" && {
-        HASH="$(echo "${HASH_LINK}" | unpath)"
-      }
+    for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
+      HASH_FILE="$(readlink "${HASH_PATH}" || fail)"
+      HASH_ABS_PATH=$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_FILE}" || fail)
+      if test "${HASH_ABS_PATH}" == "$(readlink -e "${FILE}" || fail)"; then
+        HASH="$(echo "${HASH_PATH}" | unpath)"
+      fi
     done
-    test 'not_found' == "${HASH}" && {
+    if test 'not_found' == "${HASH}"; then
       HASH="$(
         sha256sum "${FILE}" | {
           read HASH PATH
           echo $HASH
         }
       )" || fail
-    }
+    fi
     NAME=$(echo "${FILE}" | unpath) || fail
     NAMES+=("${NAME}")
     link_hash_to_file
@@ -203,7 +205,6 @@ SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
 OUTPUT=default
 
-TARGETS=()
 TAGS=()
 NAMES=()
 RESULTS=()
@@ -235,9 +236,9 @@ while test $# -gt 0; do
       fail
       ;;
     *)
-      test -e "${FILE}" &&
-        FILES+=( "$(echo "${1}")")
-      true
+      if test -e "${1}"; then
+        FILES+=("${1}")
+      fi
       ;;
   esac
   shift
