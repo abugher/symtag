@@ -6,14 +6,20 @@
 # published by Sam Hocevar. See WTFPL.txt or http://www.wtfpl.net/ for more
 # details.
 
+shopt -s expand_aliases
+alias fail='{ echo $LINENO; exit 1; }'
+alias unpath="sed 's#^.*/##g'"
+
+
 function main {
   mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
 
   for FILE in "${FILES[@]}"; do 
     HASH=not_found
     for HASH_LINK in "${SYMTAGDIR}/hashes/"*; do
-      test "$(cd "${SYMTAGDIR}/hashes"; realpath -e "$(readlink "${HASH_LINK}")")" == "$(realpath -e "${FILE}")" && 
+      test "$(cd "${SYMTAGDIR}/hashes"; realpath -e "$(readlink "${HASH_LINK}")")" == "$(realpath -e "${FILE}")" && {
         HASH="$(echo "${HASH_LINK}" | unpath)"
+      }
     done
     test 'not_found' == "${HASH}" && {
       HASH="$(
@@ -24,7 +30,7 @@ function main {
       )" || fail
     }
     NAME=$(echo "${FILE}" | unpath) || fail
-    NAMES+=($NAME)
+    NAMES+=("${NAME}")
     link_hash_to_file
     link_name_to_hash
   done
@@ -79,6 +85,15 @@ function link_hash_to_file {
 
 
 function link_name_to_hash {
+  HASH_PATH="$(readlink "${SYMTAGDIR}/names/${NAME}")"
+  HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; realpath -e "${HASH_PATH}")"
+
+  echo "${HASH_ABS_PATH}" |
+    grep -q "^$(realpath -e "${SYMTAGDIR}/hashes/")" || 
+  {
+    rm "${SYMTAGDIR}/names/${NAME}" || fail
+  }
+
   test -e "${SYMTAGDIR}/names/${NAME}" || {
     test -h "${SYMTAGDIR}/names/${NAME}" && {
       rm "${SYMTAGDIR}/names/${NAME}" || fail
@@ -173,10 +188,6 @@ function output_names {
   done
 }
 
-
-shopt -s expand_aliases
-alias fail='{ echo $LINENO; exit 1; }'
-alias unpath="sed 's#^.*/##g'"
 
 SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
