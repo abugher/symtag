@@ -10,7 +10,19 @@ function main {
   mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
 
   for FILE in "${FILES[@]}"; do 
-    HASH=$(sha256sum "${FILE}" | { read HASH PATH; echo $HASH; }) || fail
+    HASH=not_found
+    for HASH_LINK in "${SYMTAGDIR}/hashes/"*; do
+      test "$(cd "${SYMTAGDIR}/hashes"; realpath -e "$(readlink "${HASH_LINK}")")" == "$(realpath -e "${FILE}")" && 
+        HASH="$(echo "${HASH_LINK}" | unpath)"
+    done
+    test 'not_found' == "${HASH}" && {
+      HASH="$(
+        sha256sum "${FILE}" | {
+          read HASH PATH
+          echo $HASH
+        }
+      )" || fail
+    }
     NAME=$(echo "${FILE}" | unpath) || fail
     NAMES+=($NAME)
     link_hash_to_file
