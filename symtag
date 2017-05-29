@@ -18,6 +18,7 @@ function main {
   add_tags
   query
   output_names
+  output_tags
 }
 
 
@@ -25,8 +26,8 @@ function add_files {
   for FILE in "${FILES[@]}"; do 
     HASH=not_found
     for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
-      HASH_FILE="$(readlink "${HASH_PATH}" || fail)"
-      HASH_ABS_PATH=$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_FILE}" || fail)
+      HASH_FILE="$(readlink "${HASH_PATH}")" || fail
+      HASH_ABS_PATH=$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_FILE}") || fail
       if test "${HASH_ABS_PATH}" == "$(readlink -e "${FILE}" || fail)"; then
         HASH="$(echo "${HASH_PATH}" | unpath)"
       fi
@@ -59,7 +60,7 @@ function link_hash_to_file {
 
 function link_name_to_hash {
   HASH_PATH="$(readlink "${SYMTAGDIR}/names/${NAME}")"
-  HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_PATH}" || fail)"
+  HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_PATH}")" || fail
 
   echo "${HASH_ABS_PATH}" |
     grep -q "^$(readlink -e "${SYMTAGDIR}/hashes/" || fail)" || 
@@ -172,6 +173,13 @@ function output_names {
 }
 
 
+function output_tags {
+  for TAG in "${FILE_TAGS[@]}"; do
+    echo "${TAG}"
+  done
+}
+
+
 function query {
   for ELEMENT in $QUERY; do
     case "${ELEMENT}" in
@@ -198,6 +206,24 @@ function query {
         ;;
     esac
   done
+
+  FILE_TAGS=()
+  for FILE_TO_DUMP in "${FILES_TO_DUMP[@]}"; do
+    FILE_ABS_PATH="$(readlink -e "${FILE_TO_DUMP}")" || fail
+    HASH=not_found
+    for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
+      HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_PATH}")" || fail
+      if test "${HASH_ABS_PATH}" == "${FILE_ABS_PATH}"; then
+        HASH="$(echo "${HASH_PATH}" | unpath)"
+        for TAG_PATH in "${SYMTAGDIR}/tags/"*; do
+          TAG="$(echo "${TAG_PATH}" | unpath)"
+          if test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}"; then
+            FILE_TAGS+=("${TAG}")
+          fi
+        done
+      fi
+    done
+  done
 }
 
 
@@ -208,6 +234,7 @@ OUTPUT=default
 TAGS=()
 NAMES=()
 RESULTS=()
+FILES_TO_DUMP=()
 
 MODE=OR
 
@@ -230,6 +257,10 @@ while test $# -gt 0; do
       ;;
     -o|--output)
       O_OUTPUT="${2}"
+      shift
+      ;;
+    -f|--file)
+      FILES_TO_DUMP=("${2}")
       shift
       ;;
     -*)
