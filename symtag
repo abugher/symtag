@@ -62,8 +62,7 @@ function link_name_to_hash {
   HASH_PATH="$(readlink "${SYMTAGDIR}/names/${NAME}")"
   HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_PATH}")" || fail
 
-  echo "${HASH_ABS_PATH}" |
-    grep -q "^$(readlink -e "${SYMTAGDIR}/hashes/" || fail)" || 
+  echo "${HASH_ABS_PATH}" | grep -q "^$(readlink -e "${SYMTAGDIR}/hashes/${HASH}" || fail)" || 
   {
     rm "${SYMTAGDIR}/names/${NAME}" || fail
   }
