@@ -33,12 +33,10 @@ function add_files {
       fi
     done
     if test 'not_found' == "${HASH}"; then
-      HASH="$(
-        sha256sum "${FILE}" | {
-          read HASH PATH
-          echo $HASH
-        }
-      )" || fail
+      HASH="$(sha256sum "${FILE}" | {
+        read HASH PATH
+        echo $HASH
+      })" || fail
     fi
     NAME=$(echo "${FILE}" | unpath) || fail
     NAMES+=("${NAME}")
@@ -53,7 +51,8 @@ function link_hash_to_file {
     if test -h "${SYMTAGDIR}/hashes/${HASH}"; then
       rm "${SYMTAGDIR}/hashes/${HASH}" || fail
     fi
-    ln -s "$(realpath --relative-to "${SYMTAGDIR}/hashes/" "${FILE}" || fail )" "${SYMTAGDIR}/hashes/${HASH}" || fail
+    FILE_REL_PATH="$(realpath --relative-to "${SYMTAGDIR}/hashes/" "${FILE}")" || fail
+    ln -s "${FILE_REL_PATH}" "${SYMTAGDIR}/hashes/${HASH}" || fail
   fi
 }
 
@@ -64,9 +63,6 @@ function link_name_to_hash {
 
   if test -e "${NAME_PATH}"; then
     if ! test "${HASH_PATH}" == "${NAME_PATH}"; then
-      echo "debug:  NAME=${NAME}"
-      echo "debug:  NAME_PATH=${NAME_PATH}"
-      echo "debug:  HASH_PATH=${HASH_PATH}"
       rm "${SYMTAGDIR}/names/${NAME}" || fail
     fi
   fi
