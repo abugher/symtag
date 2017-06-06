@@ -26,9 +26,8 @@ function add_files {
   for FILE in "${FILES[@]}"; do 
     HASH=not_found
     for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
-      HASH_FILE="$(readlink "${HASH_PATH}")" || fail
-      HASH_ABS_PATH=$(cd "${SYMTAGDIR}/hashes"; readlink -m "${HASH_FILE}") || fail
-      if test "${HASH_ABS_PATH}" == "$(readlink -e "${FILE}" || fail)"; then
+      HASH_FILE="$(readlink -m "${HASH_PATH}")" || fail
+      if test "${HASH_FILE}" == "$(readlink -e "${FILE}" || fail)"; then
         HASH="$(echo "${HASH_PATH}" | unpath)"
       fi
     done
