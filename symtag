@@ -49,12 +49,12 @@ function add_files {
 
 
 function link_hash_to_file {
-  test -e "${SYMTAGDIR}/hashes/${HASH}" || {
-    test -h "${SYMTAGDIR}/hashes/${HASH}" && {
+  if ! test -e "${SYMTAGDIR}/hashes/${HASH}"; then
+    if test -h "${SYMTAGDIR}/hashes/${HASH}"; then
       rm "${SYMTAGDIR}/hashes/${HASH}" || fail
-    }
+    fi
     ln -s "$(realpath --relative-to "${SYMTAGDIR}/hashes/" "${FILE}" || fail )" "${SYMTAGDIR}/hashes/${HASH}" || fail
-  }
+  fi
 }
 
 
@@ -67,20 +67,20 @@ function link_name_to_hash {
     rm "${SYMTAGDIR}/names/${NAME}" || fail
   }
 
-  test -e "${SYMTAGDIR}/names/${NAME}" || {
-    test -h "${SYMTAGDIR}/names/${NAME}" && {
+  if ! test -e "${SYMTAGDIR}/names/${NAME}"; then
+    if test -h "${SYMTAGDIR}/names/${NAME}"; then
       rm "${SYMTAGDIR}/names/${NAME}" || fail
-    }
+    fi
     ln -s "../hashes/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
-  }
+  fi
 }
 
 
 function link_tag_to_hash {
   mkdir -p "${SYMTAGDIR}/tags/${TAG}" || fail
-  test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}" && {
+  if test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}"; then
     rm "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
-  }
+  fi
   ln -s "../../hashes/${HASH}" "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
 }
 
@@ -135,9 +135,9 @@ function output_names {
   NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
   shopt -s nullglob || fail
   ALL_NAMES=( "${SYMTAGDIR}/names/"* )
-  test 'off' == "${NULLGLOB}" && {
+  if test 'off' == "${NULLGLOB}"; then
     shopt -u nullglob || fail
-  }
+  fi
 
   i=0
   while test "${i}" -lt "${#ALL_NAMES[@]}"; do
@@ -274,9 +274,9 @@ while test $# -gt 0; do
   shift
 done
 
-test -f "${SYMTAGRC}" && {
+if test -f "${SYMTAGRC}"; then
   . "${SYMTAGRC}" || fail
-}
+fi
 
 ! test '' == "${O_OUTPUT}" &&
   OUTPUT="${O_OUTPUT}"
