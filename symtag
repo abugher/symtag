@@ -27,7 +27,7 @@ function add_files {
     HASH=not_found
     for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
       HASH_FILE="$(readlink "${HASH_PATH}")" || fail
-      HASH_ABS_PATH=$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_FILE}") || fail
+      HASH_ABS_PATH=$(cd "${SYMTAGDIR}/hashes"; readlink -m "${HASH_FILE}") || fail
       if test "${HASH_ABS_PATH}" == "$(readlink -e "${FILE}" || fail)"; then
         HASH="$(echo "${HASH_PATH}" | unpath)"
       fi
@@ -59,13 +59,17 @@ function link_hash_to_file {
 
 
 function link_name_to_hash {
-  HASH_PATH="$(readlink "${SYMTAGDIR}/names/${NAME}")"
-  HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_PATH}")" || fail
+  NAME_PATH="$(readlink -m "${SYMTAGDIR}/names/${NAME}")" || fail
+  HASH_PATH="$(readlink -m "${SYMTAGDIR}/hashes/${HASH}")" || fail
 
-  echo "${HASH_ABS_PATH}" | grep -q "^$(readlink -e "${SYMTAGDIR}/hashes/${HASH}" || fail)" || 
-  {
-    rm "${SYMTAGDIR}/names/${NAME}" || fail
-  }
+  if test -e "${NAME_PATH}"; then
+    if ! test "${HASH_PATH}" == "${NAME_PATH}"; then
+      echo "debug:  NAME=${NAME}"
+      echo "debug:  NAME_PATH=${NAME_PATH}"
+      echo "debug:  HASH_PATH=${HASH_PATH}"
+      rm "${SYMTAGDIR}/names/${NAME}" || fail
+    fi
+  fi
 
   if ! test -e "${SYMTAGDIR}/names/${NAME}"; then
     if test -h "${SYMTAGDIR}/names/${NAME}"; then
@@ -211,7 +215,7 @@ function query {
     FILE_ABS_PATH="$(readlink -e "${FILE_TO_DUMP}")" || fail
     HASH=not_found
     for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
-      HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -e "${HASH_PATH}")" || fail
+      HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -m "${HASH_PATH}")" || fail
       if test "${HASH_ABS_PATH}" == "${FILE_ABS_PATH}"; then
         HASH="$(echo "${HASH_PATH}" | unpath)"
         for TAG_PATH in "${SYMTAGDIR}/tags/"*; do
