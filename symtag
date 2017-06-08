@@ -141,7 +141,7 @@ function output_names {
   i=0
   while test "${i}" -lt "${#ALL_NAMES[@]}"; do
     ALL_NAMES["${i}"]="$( echo "${ALL_NAMES[$i]}" | unpath )"
-    i=$(( "${i}" + 1 ))
+    i=$(( $i + 1 ))
   done
 
   for RESULT in "${RESULTS[@]}"; do
