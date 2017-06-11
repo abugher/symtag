@@ -1,12 +1,16 @@
 ```
 symtag  
-  [file] 
   [-c <config>] 
+  [file] 
   [-n <name>] 
   [-t <tag>] 
   [-q <tag> [AND|OR|NOT <tag> ...]] 
   [-o file|link|name] 
   [-f <file>]
+
+"Instead of ~/.symtagrc, use this configuration file."
+
+  symtag -c path ...
 
 "Act on the file at this path.  If it is not known, index it.  Give it the file
 name element of this path as its name."
