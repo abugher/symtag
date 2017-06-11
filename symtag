@@ -130,7 +130,6 @@ function boolean_not {
 
 
 function output_names {
-
   NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
   shopt -s nullglob || fail
   ALL_NAMES=( "${SYMTAGDIR}/names/"* )
