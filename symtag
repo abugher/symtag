@@ -12,7 +12,7 @@ alias unpath="sed 's#^.*/##g'"
 
 
 function main {
-  mkdir -p "${SYMTAGDIR}/"{tags,names,hashes} || fail
+  mkdir -p "${SYMTAGDIR}/"{hash_by_tag,hash_by_name,path_by_hash} || fail
 
   add_files
   add_tags
@@ -25,7 +25,7 @@ function main {
 function add_files {
   for FILE in "${FILES[@]}"; do 
     HASH=not_found
-    for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
+    for HASH_PATH in "${SYMTAGDIR}/path_by_hash/"*; do
       HASH_FILE="$(readlink -m "${HASH_PATH}")" || fail
       if test "${HASH_FILE}" == "$(readlink -e "${FILE}" || fail)"; then
         HASH="$(echo "${HASH_PATH}" | unpath)"
@@ -46,47 +46,47 @@ function add_files {
 
 
 function link_hash_to_file {
-  if ! test -e "${SYMTAGDIR}/hashes/${HASH}"; then
-    if test -h "${SYMTAGDIR}/hashes/${HASH}"; then
-      rm "${SYMTAGDIR}/hashes/${HASH}" || fail
+  if ! test -e "${SYMTAGDIR}/path_by_hash/${HASH}"; then
+    if test -h "${SYMTAGDIR}/path_by_hash/${HASH}"; then
+      rm "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
     fi
-    FILE_REL_PATH="$(realpath --relative-to "${SYMTAGDIR}/hashes/" "${FILE}")" || fail
-    ln -s "${FILE_REL_PATH}" "${SYMTAGDIR}/hashes/${HASH}" || fail
+    FILE_REL_PATH="$(realpath --relative-to "${SYMTAGDIR}/path_by_hash/" "${FILE}")" || fail
+    ln -s "${FILE_REL_PATH}" "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
   fi
 }
 
 
 function link_name_to_hash {
-  NAME_PATH="$(readlink -m "${SYMTAGDIR}/names/${NAME}")" || fail
-  HASH_PATH="$(readlink -m "${SYMTAGDIR}/hashes/${HASH}")" || fail
+  NAME_PATH="$(readlink -m "${SYMTAGDIR}/hash_by_name/${NAME}")" || fail
+  HASH_PATH="$(readlink -m "${SYMTAGDIR}/path_by_hash/${HASH}")" || fail
 
   if test -e "${NAME_PATH}"; then
     if ! test "${HASH_PATH}" == "${NAME_PATH}"; then
-      rm "${SYMTAGDIR}/names/${NAME}" || fail
+      rm "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
     fi
   fi
 
-  if ! test -e "${SYMTAGDIR}/names/${NAME}"; then
-    if test -h "${SYMTAGDIR}/names/${NAME}"; then
-      rm "${SYMTAGDIR}/names/${NAME}" || fail
+  if ! test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
+    if test -h "${SYMTAGDIR}/hash_by_name/${NAME}"; then
+      rm "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
     fi
-    ln -s "../hashes/${HASH}" "${SYMTAGDIR}/names/${NAME}" || fail
+    ln -s "../path_by_hash/${HASH}" "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
   fi
 }
 
 
 function link_tag_to_hash {
-  mkdir -p "${SYMTAGDIR}/tags/${TAG}" || fail
-  if test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}"; then
-    rm "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
+  mkdir -p "${SYMTAGDIR}/hash_by_tag/${TAG}" || fail
+  if test -h "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
+    rm "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}" || fail
   fi
-  ln -s "../../hashes/${HASH}" "${SYMTAGDIR}/tags/${TAG}/${HASH}" || fail
+  ln -s "../../path_by_hash/${HASH}" "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}" || fail
 }
 
 
 function add_tags {
   for NAME in "${NAMES[@]}"; do
-    HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)" || fail
+    HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)" || fail
     for TAG in "${TAGS[@]}"; do
       link_tag_to_hash
     done
@@ -132,7 +132,7 @@ function boolean_not {
 function output_names {
   NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
   shopt -s nullglob || fail
-  ALL_NAMES=( "${SYMTAGDIR}/names/"* )
+  ALL_NAMES=( "${SYMTAGDIR}/hash_by_name/"* )
   if test 'off' == "${NULLGLOB}"; then
     shopt -u nullglob || fail
   fi
@@ -145,24 +145,24 @@ function output_names {
 
   for RESULT in "${RESULTS[@]}"; do
     for NAME in "${ALL_NAMES[@]}"; do
-      HASH="$(readlink "${SYMTAGDIR}/names/${NAME}" | unpath)"
+      HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
       if test "${HASH}" == "${RESULT}"; then
         case "${OUTPUT}" in
           hash)
             echo "${HASH}"
             ;;
           file)
-            readlink "${SYMTAGDIR}/hashes/${HASH}"
+            readlink "${SYMTAGDIR}/path_by_hash/${HASH}"
             ;;
           link)
-            echo "${SYMTAGDIR}/names/${NAME}"
+            echo "${SYMTAGDIR}/hash_by_name/${NAME}"
             ;;
           name)
             echo "${NAME}"
             ;;
           *)
             echo -n "${HASH}:  "
-            readlink "${SYMTAGDIR}/hashes/${HASH}"
+            readlink "${SYMTAGDIR}/path_by_hash/${HASH}"
         esac
       fi
     done
@@ -185,7 +185,7 @@ function query {
         continue
         ;;
       *)
-        TAGGED_FILES=( $(test -d "${SYMTAGDIR}/tags/${ELEMENT}/" && ls "${SYMTAGDIR}/tags/${ELEMENT}/") )
+        TAGGED_FILES=( $(test -d "${SYMTAGDIR}/hash_by_tag/${ELEMENT}/" && ls "${SYMTAGDIR}/hash_by_tag/${ELEMENT}/") )
         case "${MODE}" in
           OR)
             boolean_or
@@ -208,13 +208,13 @@ function query {
   for FILE_TO_DUMP in "${FILES_TO_DUMP[@]}"; do
     FILE_ABS_PATH="$(readlink -e "${FILE_TO_DUMP}")" || fail
     HASH=not_found
-    for HASH_PATH in "${SYMTAGDIR}/hashes/"*; do
-      HASH_ABS_PATH="$(cd "${SYMTAGDIR}/hashes"; readlink -m "${HASH_PATH}")" || fail
+    for HASH_PATH in "${SYMTAGDIR}/path_by_hash/"*; do
+      HASH_ABS_PATH="$(cd "${SYMTAGDIR}/path_by_hash"; readlink -m "${HASH_PATH}")" || fail
       if test "${HASH_ABS_PATH}" == "${FILE_ABS_PATH}"; then
         HASH="$(echo "${HASH_PATH}" | unpath)"
-        for TAG_PATH in "${SYMTAGDIR}/tags/"*; do
+        for TAG_PATH in "${SYMTAGDIR}/hash_by_tag/"*; do
           TAG="$(echo "${TAG_PATH}" | unpath)"
-          if test -h "${SYMTAGDIR}/tags/${TAG}/${HASH}"; then
+          if test -h "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
             FILE_TAGS+=("${TAG}")
           fi
         done
