@@ -49,4 +49,15 @@ name element of this path as its name."
 "What tags does this file have?"
 
   symtag -f file
+
+
+tag <path>
+
+  Interactively tag file.
+
+
+review
+  
+  Randomize all known files.  Open each, and simultaneously tag it 
+  interactively.
 ```
