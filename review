@@ -29,8 +29,6 @@ function main {
     unset response
     kill "${KILLME}"
 
-    sleep 1
-
   done
 }
 
