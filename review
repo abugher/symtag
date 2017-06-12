@@ -24,11 +24,10 @@ function main {
     echo "Opening:  ${FILE}"
     xterm -e bash -c "while true; do ~/bin/tag -c '${SYMTAGRC}' '${FILE}'; done" &
     KILLME=$!
-    echo "debug:  KILLME=${KILLME}"
     run-mailcap --action=view "${FILE}"
-    echo "debug:  KILLME=${KILLME}"
+    read -p "Hit enter to proceed to the next file.  " response
+    unset response
     kill "${KILLME}"
-    echo "debug:  KILLME=${KILLME}"
 
     sleep 1
 
