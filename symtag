@@ -7,7 +7,7 @@
 # details.
 
 shopt -s expand_aliases
-alias fail='{ echo $LINENO; exit 1; }'
+alias fail='{ echo "Error:  line ${LINENO}"; exit 1; }'
 alias unpath="sed 's#^.*/##g'"
 
 
@@ -178,6 +178,7 @@ function output_tags {
 
 
 function query {
+  MODE=OR
   for ELEMENT in $QUERY; do
     case "${ELEMENT}" in
       AND|OR|NOT)
@@ -232,8 +233,6 @@ TAGS=()
 NAMES=()
 RESULTS=()
 FILES_TO_DUMP=()
-
-MODE=OR
 
 while test $# -gt 0; do
   case "${1}" in
