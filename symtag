@@ -179,6 +179,7 @@ function output_tags {
 
 function query {
   MODE=OR
+  RESULTS=()
   for ELEMENT in $QUERY; do
     case "${ELEMENT}" in
       AND|OR|NOT)
@@ -229,9 +230,8 @@ SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
 OUTPUT=default
 
-TAGS=()
 NAMES=()
-RESULTS=()
+TAGS=()
 FILES_TO_DUMP=()
 
 while test $# -gt 0; do
