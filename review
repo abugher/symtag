@@ -11,9 +11,9 @@ alias fail='{ echo $LINENO; exit 1; }'
 
 
 function main {
-  for LINK in $(ls "${SYMTAGDIR}/hashes" | sort -R ); do 
+  for LINK in $(ls "${SYMTAGDIR}/path_by_hash" | sort -R ); do 
 
-    FILE="$(readlink -m "${SYMTAGDIR}/hashes/${LINK}")";
+    FILE="$(readlink -m "${SYMTAGDIR}/path_by_hash/${LINK}")";
     echo "${FILE}"
 
     if ! test -e "${FILE}"; then
