@@ -25,10 +25,10 @@ function main {
 function add_files {
   for FILE in "${FILES[@]}"; do 
     HASH=not_found
-    for PATH_TO_FILE in "${SYMTAGDIR}/path_by_hash/"*; do
-      HASH_FILE="$(readlink -m "${PATH_TO_FILE}")" || fail
-      if test "${HASH_FILE}" == "$(readlink -e "${FILE}" || fail)"; then
-        HASH="$(echo "${PATH_TO_FILE}" | unpath)"
+    for PATH_TO_HASH in "${SYMTAGDIR}/path_by_hash/"*; do
+      FILE_BY_HASH="$(readlink -m "${PATH_TO_HASH}")" || fail
+      if test "${FILE_BY_HASH}" == "$(readlink -e "${FILE}" || fail)"; then
+        HASH="$(echo "${PATH_TO_HASH}" | unpath)"
       fi
     done
     if test 'not_found' == "${HASH}"; then
@@ -57,11 +57,11 @@ function link_hash_to_file {
 
 
 function link_name_to_hash {
-  PATH_TO_HASH="$(readlink -m "${SYMTAGDIR}/hash_by_name/${NAME}")" || fail
-  PATH_TO_FILE="$(readlink -m "${SYMTAGDIR}/path_by_hash/${HASH}")" || fail
+  PATH_BY_NAME="$(readlink -m "${SYMTAGDIR}/hash_by_name/${NAME}")" || fail
+  PATH_BY_HASH="$(readlink -m "${SYMTAGDIR}/path_by_hash/${HASH}")" || fail
 
-  if test -e "${PATH_TO_HASH}"; then
-    if ! test "${PATH_TO_FILE}" == "${PATH_TO_HASH}"; then
+  if test -e "${PATH_BY_NAME}"; then
+    if ! test "${PATH_BY_HASH}" == "${PATH_BY_NAME}"; then
       rm "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
     fi
   fi
@@ -226,10 +226,10 @@ function query {
   for FILE_TO_DUMP in "${FILES_TO_DUMP[@]}"; do
     FILE_ABS_PATH="$(readlink -e "${FILE_TO_DUMP}")" || fail
     HASH=not_found
-    for PATH_TO_FILE in "${SYMTAGDIR}/path_by_hash/"*; do
-      HASH_ABS_PATH="$(cd "${SYMTAGDIR}/path_by_hash"; readlink -m "${PATH_TO_FILE}")" || fail
-      if test "${HASH_ABS_PATH}" == "${FILE_ABS_PATH}"; then
-        HASH="$(echo "${PATH_TO_FILE}" | unpath)"
+    for PATH_TO_HASH in "${SYMTAGDIR}/path_by_hash/"*; do
+      ABS_PATH_BY_HASH="$(readlink -m "${PATH_TO_HASH}")" || fail
+      if test "${ABS_PATH_BY_HASH}" == "${FILE_ABS_PATH}"; then
+        HASH="$(echo "${PATH_TO_HASH}" | unpath)"
         for TAG_PATH in "${SYMTAGDIR}/hash_by_tag/"*; do
           TAG="$(echo "${TAG_PATH}" | unpath)"
           if test -h "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
