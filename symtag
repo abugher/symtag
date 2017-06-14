@@ -24,13 +24,13 @@ function main {
 
 function add_files {
   for FILE in "${FILES[@]}"; do 
-    HASH=not_found
-    for PATH_TO_HASH in "${SYMTAGDIR}/path_by_hash/"*; do
-      FILE_BY_HASH="$(readlink -m "${PATH_TO_HASH}")" || fail
-      if test "${FILE_BY_HASH}" == "$(readlink -e "${FILE}" || fail)"; then
-        HASH="$(echo "${PATH_TO_HASH}" | unpath)"
-      fi
-    done
+
+    if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
+      HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
+    else
+      HASH=not_found
+    fi
+
     if test 'not_found' == "${HASH}"; then
       HASH="$(sha256sum "${FILE}" | {
         read HASH PATH
