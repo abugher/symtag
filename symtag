@@ -241,19 +241,10 @@ function fulfill_query {
 function dump_files {
   FILE_TAGS=()
   for FILE in "${FILES_TO_DUMP[@]}"; do
-    FILE_ABS_PATH="$(readlink -m "${FILE}")" || fail
-    HASH=not_found
-    for PATH_TO_HASH in "${SYMTAGDIR}/path_by_hash/"*; do
-      ABS_PATH_BY_HASH="$(readlink -m "${PATH_TO_HASH}")" || fail
-      if test "${ABS_PATH_BY_HASH}" == "${FILE_ABS_PATH}"; then
-        HASH="$(echo "${PATH_TO_HASH}" | unpath)"
-        for TAG_PATH in "${SYMTAGDIR}/hash_by_tag/"*; do
-          TAG="$(echo "${TAG_PATH}" | unpath)"
-          if test -h "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
-            FILE_TAGS+=("${TAG}")
-          fi
-        done
-      fi
+    NAME="$(echo "${FILE}" | unpath)" || fail
+    HASH="${SYMTAGDIR}/hash_by_name/${NAME}"
+    for TAG_PATH in "${SYMTAGDIR}/tags_by_hash/${HASH}/"*; do
+      FILE_TAGS+=("$(echo "${TAG_PATH}" | unpath)")
     done
   done
 }

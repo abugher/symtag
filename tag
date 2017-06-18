@@ -31,7 +31,7 @@ for TAG in ${LINE}; do
 done
 
 COMMAND="~/bin/symtag -c '${SYMTAGRC}' '${FILE}' ${SUFFIX}"
-nohup "${COMMAND}" >/dev/null 2>&1 &
+eval nohup "${COMMAND}" >/dev/null 2>&1 &
 
 }
 
