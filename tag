@@ -30,8 +30,8 @@ for TAG in ${LINE}; do
   SUFFIX+=" -t '${TAG}'"
 done
 
-eval "~/bin/symtag -c "${SYMTAGRC}" '${FILE}' ${SUFFIX}" &
-disown
+COMMAND="~/bin/symtag -c '${SYMTAGRC}' '${FILE}' ${SUFFIX}"
+nohup "${COMMAND}" >/dev/null 2>&1 &
 
 }
 
