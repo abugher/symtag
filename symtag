@@ -308,7 +308,8 @@ if test -f "${SYMTAGRC}"; then
   . "${SYMTAGRC}" || fail
 fi
 
-! test '' == "${O_OUTPUT}" &&
+if ! test '' == "${O_OUTPUT}"; then
   OUTPUT="${O_OUTPUT}"
+fi
 
 main
