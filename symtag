@@ -24,7 +24,7 @@ function main {
 
 
 function add_files {
-  for FILE in "${FILES[@]}"; do 
+  for FILE in "${FILES_TO_TAG[@]}"; do 
 
     HASH=''
     if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
@@ -240,8 +240,8 @@ function fulfill_query {
 
 function dump_files {
   FILE_TAGS=()
-  for FILE_TO_DUMP in "${FILES_TO_DUMP[@]}"; do
-    FILE_ABS_PATH="$(readlink -m "${FILE_TO_DUMP}")" || fail
+  for FILE in "${FILES_TO_DUMP[@]}"; do
+    FILE_ABS_PATH="$(readlink -m "${FILE}")" || fail
     HASH=not_found
     for PATH_TO_HASH in "${SYMTAGDIR}/path_by_hash/"*; do
       ABS_PATH_BY_HASH="$(readlink -m "${PATH_TO_HASH}")" || fail
@@ -297,7 +297,7 @@ while test $# -gt 0; do
       ;;
     *)
       if test -e "${1}"; then
-        FILES+=("${1}")
+        FILES_TO_TAG+=("${1}")
       fi
       ;;
   esac
