@@ -73,12 +73,11 @@ function link_name_to_hash {
     ln -s "../path_by_hash/${HASH}" "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
   fi
 
-  mkdir -p "${SYMTAGDIR}/name_by_hash/${NAME}" || fail
-  if ! test -e "${SYMTAGDIR}/name_by_hash/${NAME}/${HASH}"; then
-    if test -h "${SYMTAGDIR}/name_by_hash/${NAME}/${HASH}"; then
-      rm "${SYMTAGDIR}/name_by_hash/${NAME}/${HASH}" || fail
+  if ! test -e "${SYMTAGDIR}/name_by_hash/${HASH}"; then
+    if test -h "${SYMTAGDIR}/name_by_hash/${HASH}"; then
+      rm "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
     fi
-    ln -s "${SYMTAGDIR}/path_by_hash/${HASH}" "${SYMTAGDIR}/name_by_hash/${NAME}/${HASH}" || fail
+    ln -s "${SYMTAGDIR}/hash_by_name/${NAME}" "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
   fi
 }
 
