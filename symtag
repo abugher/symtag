@@ -16,7 +16,8 @@ function main {
 
   add_files
   add_tags
-  query
+  fulfill_query
+  dump_files
   output_names
   output_tags
 }
@@ -131,14 +132,14 @@ function add_tags {
 
 
 function boolean_or {
-  RESULTS+=("${TAGGED_FILES[@]}")
+  RESULTS+=("${HASHES_BY_TAG[@]}")
 }
 
 
 function boolean_and {
   NEW_RESULTS=()
   for RESULT in "${RESULTS[@]}"; do
-    for TAGGED_FILE in "${TAGGED_FILES[@]}"; do
+    for TAGGED_FILE in "${HASHES_BY_TAG[@]}"; do
       if test "${RESULT}" == "${TAGGED_FILE}"; then
         NEW_RESULTS+=("${RESULT}")
       fi
@@ -152,7 +153,7 @@ function boolean_not {
   NEW_RESULTS=()
   for RESULT in "${RESULTS[@]}"; do
     MATCH=no
-    for TAGGED_FILE in "${TAGGED_FILES[@]}"; do
+    for TAGGED_FILE in "${HASHES_BY_TAG[@]}"; do
       if test "${RESULT}" == "${TAGGED_FILE}"; then
         MATCH=yes
       fi
@@ -213,7 +214,7 @@ function output_tags {
 }
 
 
-function query {
+function fulfill_query {
   MODE=OR
   RESULTS=()
   for ELEMENT in $QUERY; do
@@ -223,7 +224,7 @@ function query {
         continue
         ;;
       *)
-        TAGGED_FILES=( $(test -d "${SYMTAGDIR}/hash_by_tag/${ELEMENT}/" && ls "${SYMTAGDIR}/hash_by_tag/${ELEMENT}/") )
+        HASHES_BY_TAG=( $(test -d "${SYMTAGDIR}/hash_by_tag/${ELEMENT}/" && ls "${SYMTAGDIR}/hash_by_tag/${ELEMENT}/") )
         case "${MODE}" in
           OR)
             boolean_or
@@ -241,7 +242,10 @@ function query {
         ;;
     esac
   done
+}
 
+
+function dump_files {
   FILE_TAGS=()
   for FILE_TO_DUMP in "${FILES_TO_DUMP[@]}"; do
     FILE_ABS_PATH="$(readlink -e "${FILE_TO_DUMP}")" || fail
