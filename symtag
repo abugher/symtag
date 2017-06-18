@@ -139,8 +139,8 @@ function boolean_or {
 function boolean_and {
   NEW_HASHES_BY_QUERY=()
   for HASH_BY_QUERY in "${HASHES_BY_QUERY[@]}"; do
-    for TAGGED_FILE in "${HASHES_BY_TAG[@]}"; do
-      if test "${HASH_BY_QUERY}" == "${TAGGED_FILE}"; then
+    for HASH_BY_TAG in "${HASHES_BY_TAG[@]}"; do
+      if test "${HASH_BY_QUERY}" == "${HASH_BY_TAG}"; then
         NEW_HASHES_BY_QUERY+=("${HASH_BY_QUERY}")
       fi
     done
@@ -153,8 +153,8 @@ function boolean_not {
   NEW_HASHES_BY_QUERY=()
   for HASH_BY_QUERY in "${HASHES_BY_QUERY[@]}"; do
     MATCH=no
-    for TAGGED_FILE in "${HASHES_BY_TAG[@]}"; do
-      if test "${HASH_BY_QUERY}" == "${TAGGED_FILE}"; then
+    for HASH_BY_TAG in "${HASHES_BY_TAG[@]}"; do
+      if test "${HASH_BY_QUERY}" == "${HASH_BY_TAG}"; then
         MATCH=yes
       fi
     done
@@ -186,10 +186,11 @@ function output_names {
         echo "${HASH_BY_QUERY}"
         ;;
       file)
-        readlink "${SYMTAGDIR}/path_by_hash/${HASH_BY_QUERY}"
+        readlink "${SYMTAGDIR}/path_by_hash/${HASH_BY_QUERY}" || fail
         ;;
       name)
-        readlink "${SYMTAGDIR}/name_by_hash/${HASH_BY_QUERY}" | unpath
+        PATH_TO_FILE="$(readlink "${SYMTAGDIR}/name_by_hash/${HASH_BY_QUERY}")" || fail
+        echo "${PATH_TO_FILE}" | unpath
         ;;
       *)
         echo -n "${HASH_BY_QUERY}:  "
@@ -240,7 +241,7 @@ function fulfill_query {
 function dump_files {
   FILE_TAGS=()
   for FILE_TO_DUMP in "${FILES_TO_DUMP[@]}"; do
-    FILE_ABS_PATH="$(readlink -e "${FILE_TO_DUMP}")" || fail
+    FILE_ABS_PATH="$(readlink -m "${FILE_TO_DUMP}")" || fail
     HASH=not_found
     for PATH_TO_HASH in "${SYMTAGDIR}/path_by_hash/"*; do
       ABS_PATH_BY_HASH="$(readlink -m "${PATH_TO_HASH}")" || fail
