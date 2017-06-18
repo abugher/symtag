@@ -242,13 +242,16 @@ function dump_files {
   FILE_TAGS=()
   for FILE in "${FILES_TO_DUMP[@]}"; do
     NAME="$(echo "${FILE}" | unpath)" || fail
-    HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
+    PATH_TO_HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}")" || fail
+    HASH="$(echo "${PATH_TO_HASH}" | unpath)"
+
     NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
     shopt -s nullglob || fail
     PATHS_TO_TAGS_BY_HASH=( "${SYMTAGDIR}/tag_by_hash/${HASH}/"* )
     if test 'off' == "${NULLGLOB}"; then
       shopt -u nullglob || fail
     fi
+
     for TAG_PATH in "${PATHS_TO_TAGS_BY_HASH[@]}"; do
       FILE_TAGS+=("$(echo "${TAG_PATH}" | unpath)")
     done
