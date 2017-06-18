@@ -15,63 +15,64 @@ $SYMTAGDIR/
   hash_by_name
   hash_by_tag
 
-Filenames:
+Directory naming conventions:
   
   path:         path of file
   name:         last element of path
   tag:          descriptor of file
   hash:         sha256sum of file
 
-"Instead of ~/.symtagrc, use this configuration file."
 
-  symtag -c path ...
+symtag -c path ...
 
-"Act on the file at this path.  If it is not known, index it.  Give it the file
-name element of this path as its name."
+  "Instead of ~/.symtagrc, use this configuration file."
 
-  symtag path ...
+symtag path ...
 
-"Act on the file associated with this name."
+  "Act on the file at this path.  If it is not known, index it.  Give it the
+  file name element of this path as its name."
 
-  symtag -n name ...
+symtag -n name ...
 
-"Associate the file with these tags."
+  "Act on the file associated with this name."
 
-  symtag path    -t tag -t tag
-  symtag -n name -t tag -t tag
+symtag path    -t tag -t tag
+symtag -n name -t tag -t tag
 
-"What files are associated with this tag?"
+  "Associate the file with these tags."
 
-  symtag -q this
+symtag -q this
 
-"Remove from that set files associated with that tag."
+  "What files are associated with this tag?"
 
-  symtag -q 'this NOT that'
+symtag -q 'this NOT that'
 
-"Remove from that set files not associated with another tag."
+  "Remove from that set files associated with that tag."
 
-  symtag -q 'this NOT that AND another'
+symtag -q 'this NOT that AND another'
 
-"Add to that set files associated with an additional tag."
+  "Remove from that set files not associated with another tag."
 
-  symtag -q 'this NOT that AND another OR additional'
+symtag -q 'this NOT that AND another OR additional'
 
-"Answer my query with the path of each matching file."
+  "Add to that set files associated with an additional tag."
 
-  symtag -q 'this NOT that AND another OR additional' -o file
+symtag -q 'this NOT that AND another OR additional' -o file
 
-"What tags does this file have?"
+  "Answer my query with the path of each matching file."
 
-  symtag -f file
+symtag -f file
+
+  "What tags does this file have?"
 
 
 tag <path>
 
-  Interactively tag file.
+  Prompt for space separated tags to describe the file at path.
 
 
 review
   
-  Randomize all known files.  Open each, and simultaneously tag it 
-  interactively.
+  Open each known file, as instructed by mailcap, in random order, and
+  simultaneously continuously prompt for space separated tags in another window.
 ```
