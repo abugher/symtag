@@ -25,19 +25,20 @@ function main {
 function add_files {
   for FILE in "${FILES[@]}"; do 
 
+    HASH=''
     if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
       HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
-    else
-      HASH=not_found
     fi
 
-    if test 'not_found' == "${HASH}"; then
+    if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then
       HASH="$(sha256sum "${FILE}" | {
         read HASH PATH
         echo $HASH
       })" || fail
     fi
-    NAME=$(echo "${FILE}" | unpath) || fail
+    if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then fail; fi
+    NAME=$(echo "${FILE}" | unpath)
+    if test '' == "${NAME}"; then fail; fi
     NAMES+=("${NAME}")
     link_hash_to_file
     link_name_to_hash
@@ -46,6 +47,12 @@ function add_files {
 
 
 function link_hash_to_file {
+  if 
+    test '' == "${HASH}" \
+    -o   '' == "${FILE}"
+  then fail
+  fi
+
   if ! test -e "${SYMTAGDIR}/path_by_hash/${HASH}"; then
     if test -h "${SYMTAGDIR}/path_by_hash/${HASH}"; then
       rm "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
@@ -57,6 +64,12 @@ function link_hash_to_file {
 
 
 function link_name_to_hash {
+  if 
+    test '' == "${HASH}" \
+    -o   '' == "${NAME}"
+  then fail
+  fi
+
   PATH_BY_NAME="$(readlink -m "${SYMTAGDIR}/hash_by_name/${NAME}")" || fail
   PATH_BY_HASH="$(readlink -m "${SYMTAGDIR}/path_by_hash/${HASH}")" || fail
 
@@ -83,6 +96,12 @@ function link_name_to_hash {
 
 
 function link_tag_to_hash {
+  if 
+    test '' == "${HASH}" \
+    -o   '' == "${TAG}"
+  then fail
+  fi
+
   mkdir -p "${SYMTAGDIR}/hash_by_tag/${TAG}" || fail
   if test -h "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
     rm "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}" || fail
@@ -102,6 +121,8 @@ function link_tag_to_hash {
 function add_tags {
   for NAME in "${NAMES[@]}"; do
     HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)" || fail
+    if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then fail fi
+
     for TAG in "${TAGS[@]}"; do
       link_tag_to_hash
     done
