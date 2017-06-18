@@ -8,6 +8,20 @@ symtag
   [-o file|link|name] 
   [-f <file>]
 
+$SYMTAGDIR/
+  path_by_hash
+  name_by_hash
+  tag_by_hash
+  hash_by_name
+  hash_by_tag
+
+Filenames:
+  
+  path:         path of file
+  name:         last element of path
+  tag:          descriptor of file
+  hash:         sha256sum of file
+
 "Instead of ~/.symtagrc, use this configuration file."
 
   symtag -c path ...
