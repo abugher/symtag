@@ -168,14 +168,14 @@ function boolean_not {
 function output_names {
   NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
   shopt -s nullglob || fail
-  ALL_NAMES=( "${SYMTAGDIR}/hash_by_name/"* )
+  ALL_PATHS_TO_NAMES=( "${SYMTAGDIR}/hash_by_name/"* )
   if test 'off' == "${NULLGLOB}"; then
     shopt -u nullglob || fail
   fi
 
   i=0
-  while test "${i}" -lt "${#ALL_NAMES[@]}"; do
-    ALL_NAMES["${i}"]="$( echo "${ALL_NAMES[$i]}" | unpath )"
+  while test "${i}" -lt "${#ALL_PATHS_TO_NAMES[@]}"; do
+    ALL_NAMES["${i}"]="$( echo "${ALL_PATHS_TO_NAMES[$i]}" | unpath )"
     i=$(( $i + 1 ))
   done
 
