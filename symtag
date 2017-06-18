@@ -132,37 +132,37 @@ function add_tags {
 
 
 function boolean_or {
-  RESULTS+=("${HASHES_BY_TAG[@]}")
+  HASHES_BY_QUERY+=("${HASHES_BY_TAG[@]}")
 }
 
 
 function boolean_and {
-  NEW_RESULTS=()
-  for RESULT in "${RESULTS[@]}"; do
+  NEW_HASHES_BY_QUERY=()
+  for HASH_BY_QUERY in "${HASHES_BY_QUERY[@]}"; do
     for TAGGED_FILE in "${HASHES_BY_TAG[@]}"; do
-      if test "${RESULT}" == "${TAGGED_FILE}"; then
-        NEW_RESULTS+=("${RESULT}")
+      if test "${HASH_BY_QUERY}" == "${TAGGED_FILE}"; then
+        NEW_HASHES_BY_QUERY+=("${HASH_BY_QUERY}")
       fi
     done
   done
-  RESULTS=( "${NEW_RESULTS[@]}" )
+  HASHES_BY_QUERY=( "${NEW_HASHES_BY_QUERY[@]}" )
 }
 
 
 function boolean_not {
-  NEW_RESULTS=()
-  for RESULT in "${RESULTS[@]}"; do
+  NEW_HASHES_BY_QUERY=()
+  for HASH_BY_QUERY in "${HASHES_BY_QUERY[@]}"; do
     MATCH=no
     for TAGGED_FILE in "${HASHES_BY_TAG[@]}"; do
-      if test "${RESULT}" == "${TAGGED_FILE}"; then
+      if test "${HASH_BY_QUERY}" == "${TAGGED_FILE}"; then
         MATCH=yes
       fi
     done
     if test "${MATCH}" == no; then
-      NEW_RESULTS+=( "${RESULT}" )
+      NEW_HASHES_BY_QUERY+=( "${HASH_BY_QUERY}" )
     fi
   done
-  RESULTS=( "${NEW_RESULTS[@]}" )
+  HASHES_BY_QUERY=( "${NEW_HASHES_BY_QUERY[@]}" )
 }
 
 
@@ -180,29 +180,21 @@ function output_names {
     i=$(( $i + 1 ))
   done
 
-  for RESULT in "${RESULTS[@]}"; do
-    for NAME in "${ALL_NAMES[@]}"; do
-      HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
-      if test "${HASH}" == "${RESULT}"; then
-        case "${OUTPUT}" in
-          hash)
-            echo "${HASH}"
-            ;;
-          file)
-            readlink "${SYMTAGDIR}/path_by_hash/${HASH}"
-            ;;
-          link)
-            echo "${SYMTAGDIR}/hash_by_name/${NAME}"
-            ;;
-          name)
-            echo "${NAME}"
-            ;;
-          *)
-            echo -n "${HASH}:  "
-            readlink "${SYMTAGDIR}/path_by_hash/${HASH}"
-        esac
-      fi
-    done
+  for HASH_BY_QUERY in "${HASHES_BY_QUERY[@]}"; do
+    case "${OUTPUT}" in
+      hash)
+        echo "${HASH_BY_QUERY}"
+        ;;
+      file)
+        readlink "${SYMTAGDIR}/path_by_hash/${HASH_BY_QUERY}"
+        ;;
+      name)
+        readlink "${SYMTAGDIR}/name_by_hash/${HASH_BY_QUERY}" | unpath
+        ;;
+      *)
+        echo -n "${HASH_BY_QUERY}:  "
+        readlink "${SYMTAGDIR}/path_by_hash/${HASH_BY_QUERY}"
+    esac
   done
 }
 
@@ -216,7 +208,7 @@ function output_tags {
 
 function fulfill_query {
   MODE=OR
-  RESULTS=()
+  HASHES_BY_QUERY=()
   for ELEMENT in $QUERY; do
     case "${ELEMENT}" in
       AND|OR|NOT)
