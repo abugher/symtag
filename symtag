@@ -77,7 +77,7 @@ function link_name_to_hash {
     if test -h "${SYMTAGDIR}/name_by_hash/${HASH}"; then
       rm "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
     fi
-    ln -s "${SYMTAGDIR}/hash_by_name/${NAME}" "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
+    ln -s "../hash_by_name/${NAME}" "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
   fi
 }
 
@@ -94,7 +94,7 @@ function link_tag_to_hash {
     if test -h "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}"; then
       rm "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
     fi
-    ln -s "${SYMTAGDIR}/tags/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
+    ln -s "../tags/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
   fi
 }
 
