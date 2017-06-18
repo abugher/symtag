@@ -167,16 +167,16 @@ function boolean_not {
 
 
 function output_names {
-  NULLGLOB=$(shopt nullglob | { read x y && echo $y; })
+  NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
   shopt -s nullglob || fail
-  ALL_PATHS_TO_NAMES=( "${SYMTAGDIR}/hash_by_name/"* )
+  PATHS_TO_ALL_NAMES=( "${SYMTAGDIR}/hash_by_name/"* )
   if test 'off' == "${NULLGLOB}"; then
     shopt -u nullglob || fail
   fi
 
   i=0
-  while test "${i}" -lt "${#ALL_PATHS_TO_NAMES[@]}"; do
-    ALL_NAMES["${i}"]="$( echo "${ALL_PATHS_TO_NAMES[$i]}" | unpath )"
+  while test "${i}" -lt "${#PATHS_TO_ALL_NAMES[@]}"; do
+    ALL_NAMES["${i}"]="$( echo "${PATHS_TO_ALL_NAMES[$i]}" | unpath )"
     i=$(( $i + 1 ))
   done
 
@@ -186,7 +186,7 @@ function output_names {
         echo "${HASH_BY_QUERY}"
         ;;
       file)
-        readlink "${SYMTAGDIR}/path_by_hash/${HASH_BY_QUERY}" || fail
+        readlink -m "${SYMTAGDIR}/path_by_hash/${HASH_BY_QUERY}" || fail
         ;;
       name)
         PATH_TO_FILE="$(readlink "${SYMTAGDIR}/name_by_hash/${HASH_BY_QUERY}")" || fail
@@ -242,8 +242,14 @@ function dump_files {
   FILE_TAGS=()
   for FILE in "${FILES_TO_DUMP[@]}"; do
     NAME="$(echo "${FILE}" | unpath)" || fail
-    HASH="${SYMTAGDIR}/hash_by_name/${NAME}"
-    for TAG_PATH in "${SYMTAGDIR}/tags_by_hash/${HASH}/"*; do
+    HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
+    NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
+    shopt -s nullglob || fail
+    PATHS_TO_TAGS_BY_HASH=( "${SYMTAGDIR}/tag_by_hash/${HASH}/"* )
+    if test 'off' == "${NULLGLOB}"; then
+      shopt -u nullglob || fail
+    fi
+    for TAG_PATH in "${PATHS_TO_TAGS_BY_HASH[@]}"; do
       FILE_TAGS+=("$(echo "${TAG_PATH}" | unpath)")
     done
   done
@@ -280,7 +286,7 @@ while test $# -gt 0; do
       shift
       ;;
     -f|--file)
-      FILES_TO_DUMP=("${2}")
+      FILES_TO_DUMP+=("${2}")
       shift
       ;;
     -*)
