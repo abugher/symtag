@@ -35,6 +35,8 @@ done << EOF
   test '../../bar' == "$(readlink "${symtagdir}/path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
   test '../path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730' == "$(readlink "${symtagdir}/hash_by_name/bar")"
   test '../hash_by_name/bar' == "$(readlink "${symtagdir}/name_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
+  test '../../path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730' == "$(readlink "${symtagdir}/hash_by_tag/bar/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
+  test '../../hash_by_tag/bar' == "$(readlink "${symtagdir}/tag_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730/bar")"
   symtag -c "${symtagrc}" "${test_dir}"/{foo,bar} -t foobar -t fubar
 EOF
 

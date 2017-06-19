@@ -116,7 +116,7 @@ function link_tag_to_hash {
   if test -e "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}"; then
     rm -rf "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
   fi
-  ln -s "../tags/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
+  ln -s "../../hash_by_tag/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
 }
 
 
