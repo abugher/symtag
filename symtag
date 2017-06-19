@@ -25,6 +25,8 @@ function main {
 
 function add_files {
   for FILE in "${FILES_TO_TAG[@]}"; do 
+    NAME=$(echo "${FILE}" | unpath)
+    if test '' == "${NAME}"; then fail; fi
 
     HASH=''
     if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
@@ -37,9 +39,6 @@ function add_files {
       })" || fail
     fi
     if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then fail; fi
-
-    NAME=$(echo "${FILE}" | unpath)
-    if test '' == "${NAME}"; then fail; fi
 
     NAMES_TO_TAG+=("${NAME}")
     HASHES_TO_TAG+=("${HASH}")

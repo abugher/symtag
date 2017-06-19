@@ -12,9 +12,9 @@ failure_count=0
 while read command; do
   let test_count++
   if eval "${command}" >/dev/null 2>&1; then
-    echo "Pass:  eval '${command}'"
+    echo "Pass:  ${test_count}"
   else
-    echo "Fail:  eval '${command}'"
+    echo "Fail:  ${test_count}"
     let failure_count++
   fi
 done << EOF
@@ -28,9 +28,13 @@ done << EOF
   echo foo > "${test_dir}/foo"
   echo bar > "${test_dir}/bar"
   symtag -c "${symtagrc}" "${test_dir}/foo"
-  symtag -c "${symtagrc}" "${test_dir}/bar" -t bar
   test '../../foo' == "$(readlink "${symtagdir}/path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
+  test '../path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c' == "$(readlink "${symtagdir}/hash_by_name/foo")"
+  test '../hash_by_name/foo' == "$(readlink "${symtagdir}/name_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
+  symtag -c "${symtagrc}" "${test_dir}/bar" -t bar
   test '../../bar' == "$(readlink "${symtagdir}/path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
+  test '../path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730' == "$(readlink "${symtagdir}/hash_by_name/bar")"
+  test '../hash_by_name/bar' == "$(readlink "${symtagdir}/name_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
   symtag -c "${symtagrc}" "${test_dir}"/{foo,bar} -t foobar -t fubar
 EOF
 
