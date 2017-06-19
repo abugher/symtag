@@ -65,13 +65,11 @@ function link_hash_to_file {
   then fail
   fi
 
-  if ! test -e "${SYMTAGDIR}/path_by_hash/${HASH}"; then
-    if test -h "${SYMTAGDIR}/path_by_hash/${HASH}"; then
-      rm "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
-    fi
-    FILE_REL_PATH="$(realpath --relative-to "${SYMTAGDIR}/path_by_hash/" "${FILE}")" || fail
-    ln -s "${FILE_REL_PATH}" "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
+  if test -e "${SYMTAGDIR}/path_by_hash/${HASH}"; then
+    rm -rf "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
   fi
+  FILE_REL_PATH="$(realpath --relative-to "${SYMTAGDIR}/path_by_hash/" "${FILE}")" || fail
+  ln -s "${FILE_REL_PATH}" "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
 }
 
 
@@ -86,24 +84,18 @@ function link_name_to_hash {
   PATH_BY_HASH="$(readlink -m "${SYMTAGDIR}/path_by_hash/${HASH}")" || fail
 
   if test -e "${PATH_BY_NAME}"; then
-    if ! test "${PATH_BY_HASH}" == "${PATH_BY_NAME}"; then
-      rm "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
-    fi
+    rm -rf "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
   fi
 
-  if ! test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
-    if test -h "${SYMTAGDIR}/hash_by_name/${NAME}"; then
-      rm "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
-    fi
-    ln -s "../path_by_hash/${HASH}" "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
+  if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
+    rm -rf "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
   fi
+  ln -s "../path_by_hash/${HASH}" "${SYMTAGDIR}/hash_by_name/${NAME}" || fail
 
-  if ! test -e "${SYMTAGDIR}/name_by_hash/${HASH}"; then
-    if test -h "${SYMTAGDIR}/name_by_hash/${HASH}"; then
-      rm "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
-    fi
-    ln -s "../hash_by_name/${NAME}" "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
+  if test -e "${SYMTAGDIR}/name_by_hash/${HASH}"; then
+    rm -rf "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
   fi
+  ln -s "../hash_by_name/${NAME}" "${SYMTAGDIR}/name_by_hash/${HASH}" || fail
 }
 
 
@@ -115,18 +107,16 @@ function link_tag_to_hash {
   fi
 
   mkdir -p "${SYMTAGDIR}/hash_by_tag/${TAG}" || fail
-  if test -h "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
-    rm "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}" || fail
+  if test -e "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}"; then
+    rm -rf "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}" || fail
   fi
   ln -s "../../path_by_hash/${HASH}" "${SYMTAGDIR}/hash_by_tag/${TAG}/${HASH}" || fail
 
-  mkdir -p "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
-  if ! test -e "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}"; then
-    if test -h "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}"; then
-      rm "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
-    fi
-    ln -s "../tags/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
+  mkdir -p "${SYMTAGDIR}/tag_by_hash/${HASH}" || fail
+  if test -e "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}"; then
+    rm -rf "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
   fi
+  ln -s "../tags/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
 }
 
 
