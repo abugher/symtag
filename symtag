@@ -30,7 +30,6 @@ function add_files {
     if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
       HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
     fi
-
     if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then
       HASH="$(sha256sum "${FILE}" | {
         read HASH PATH
@@ -38,11 +37,24 @@ function add_files {
       })" || fail
     fi
     if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then fail; fi
+
     NAME=$(echo "${FILE}" | unpath)
     if test '' == "${NAME}"; then fail; fi
-    NAMES+=("${NAME}")
+
+    NAMES_TO_TAG+=("${NAME}")
+    HASHES_TO_TAG+=("${HASH}")
+
     link_hash_to_file
     link_name_to_hash
+  done
+}
+
+
+function add_tags {
+  for HASH in "${HASHES_TO_TAG[@]}"; do
+    for TAG in "${TAGS[@]}"; do
+      link_tag_to_hash
+    done
   done
 }
 
@@ -116,18 +128,6 @@ function link_tag_to_hash {
     fi
     ln -s "../tags/${TAG}" "${SYMTAGDIR}/tag_by_hash/${HASH}/${TAG}" || fail
   fi
-}
-
-
-function add_tags {
-  for NAME in "${NAMES[@]}"; do
-    HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)" || fail
-    if ! echo "${HASH}" | grep -qE '^[0-9a-z]{64,64}$'; then fail fi
-
-    for TAG in "${TAGS[@]}"; do
-      link_tag_to_hash
-    done
-  done
 }
 
 
@@ -263,7 +263,9 @@ SYMTAGRC=~/.symtagrc
 SYMTAGDIR=~/.symtag
 OUTPUT=default
 
-NAMES=()
+FILES_TO_TAG=()
+NAMES_TO_TAG=()
+HASHES_TO_TAG=()
 TAGS=()
 FILES_TO_DUMP=()
 
@@ -274,7 +276,7 @@ while test $# -gt 0; do
       shift
       ;;
     -n|--name)
-      NAMES+=("${2}")
+      NAMES_TO_TAG+=("${2}")
       ;;
     -t|--tag)
       TAGS+=("${2}")
