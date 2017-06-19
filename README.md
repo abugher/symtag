@@ -75,4 +75,9 @@ review
   
   Open each known file, as instructed by mailcap, in random order, and
   simultaneously continuously prompt for space separated tags in another window.
+
+
+tests
+
+  Test functionality.
 ```
