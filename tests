@@ -60,6 +60,7 @@ done << EOF
   ! { symtag -c "${symtagrc}" -o name -q 'fubar AND bar'        | grep -q '^foo$'; }
   symtag     -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^bar$'
   ! { symtag -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^foo$'; }
+  symtag     -c "${symtagrc}" -o hash -q 'bar'                  | grep -qE '^[a-z0-9]{64,64}$'
 EOF
 
 echo "Success:  ${success_count}/${test_count}"
