@@ -264,9 +264,6 @@ while test $# -gt 0; do
       SYMTAGRC="${2}"
       shift
       ;;
-    -n|--name)
-      NAMES_TO_TAG+=("${2}")
-      ;;
     -t|--tag)
       TAGS+=("${2}")
       shift

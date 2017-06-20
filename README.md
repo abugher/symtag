@@ -2,7 +2,6 @@
 symtag  
   [-c <config>] 
   [file] 
-  [-n <name>] 
   [-t <tag>] 
   [-q <tag> [AND|OR|NOT <tag> ...]] 
   [-o file|link|name] 
@@ -32,12 +31,7 @@ symtag path ...
   "Act on the file at this path.  If it is not known, index it.  Give it the
   file name element of this path as its name."
 
-symtag -n name ...
-
-  "Act on the file associated with this name."
-
 symtag path    -t tag -t tag
-symtag -n name -t tag -t tag
 
   "Associate the file with these tags."
 
