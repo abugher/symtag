@@ -61,6 +61,10 @@ done << EOF
   symtag     -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^bar$'
   ! { symtag -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^foo$'; }
   symtag     -c "${symtagrc}" -o hash -q 'bar'                  | grep -qE '^[a-z0-9]{64,64}$'
+  ! { symtag -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^foo$'; }
+  ! { symtag -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^bar$'; }
+  symtag     -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^fubar$'
+  symtag     -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^foobar$'
 EOF
 
 echo "Success:  ${success_count}/${test_count}"
