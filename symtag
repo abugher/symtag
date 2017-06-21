@@ -68,7 +68,7 @@ function link_hash_to_file {
   if test -e "${SYMTAGDIR}/path_by_hash/${HASH}"; then
     rm -rf "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
   fi
-  FILE_REL_PATH="$(realpath --relative-to "${SYMTAGDIR}/path_by_hash/" "${FILE}")" || fail
+  FILE_REL_PATH="$(realpath -s --relative-to "${SYMTAGDIR}/path_by_hash/" "${FILE}")" || fail
   ln -s "${FILE_REL_PATH}" "${SYMTAGDIR}/path_by_hash/${HASH}" || fail
 }
 
