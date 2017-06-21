@@ -32,13 +32,13 @@ function add_files {
     if test -e "${SYMTAGDIR}/hash_by_name/${NAME}"; then
       HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}" | unpath)"
     fi
-    if ! echo "${HASH}" | is_hash; then
+    if ! is_hash "${HASH}"; then
       HASH="$(sha256sum "${FILE}" | {
         read HASH PATH
         echo $HASH
       })" || fail
     fi
-    if ! echo "${HASH}" | is_hash; then fail; fi
+    if ! is_hash "${HASH}"; then fail; fi
 
     NAMES_TO_TAG+=("${NAME}")
     HASHES_TO_TAG+=("${HASH}")
@@ -249,7 +249,8 @@ function dump_files {
 
 
 function is_hash {
-  grep -qE '^[0-9a-z]{64,64}$'
+  echo "${1}" \
+    | grep -qE '^[0-9a-z]{64,64}$'
 }
 
 
