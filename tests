@@ -24,11 +24,14 @@ done << EOF
   rm -rf "${test_dir}"
   mkdir "${test_dir}"
   mkdir "${symtagdir}"
+  mkdir "${test_dir}/other"
   echo SYMTAGDIR="'${symtagdir}'" >> "${symtagrc}"
   symtag -c "${symtagrc}"
   ls -d "${symtagdir}"/{path_by_hash,hash_by_name,hash_by_tag,name_by_hash,tag_by_hash}
   echo foo > "${test_dir}/foo"
   echo bar > "${test_dir}/bar"
+  echo not_indexed > "${test_dir}/not_indexed"
+  echo other_foo > "${test_dir}/other/foo"
   symtag -c "${symtagrc}" "${test_dir}/foo"
   test '../../foo' == "$(readlink "${symtagdir}/path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
   test '../path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c' == "$(readlink "${symtagdir}/hash_by_name/foo")"
@@ -62,10 +65,20 @@ done << EOF
   symtag     -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^bar$'
   ! { symtag -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^foo$'; }
   symtag     -c "${symtagrc}" -o hash -q 'bar'                  | grep -qE '^[a-z0-9]{64,64}$'
-  ! { symtag -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^foo$'; }
-  ! { symtag -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^bar$'; }
-  symtag     -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^fubar$'
-  symtag     -c "${symtagrc}" -f "${symtagdir}/foo"             | grep -q '^foobar$'
+  symtag     -c "${symtagrc}" -f "${test_dir}/foo"
+  ! { symtag -c "${symtagrc}" -f "${test_dir}/foo"             | grep -q '^foo$'; }
+  ! { symtag -c "${symtagrc}" -f "${test_dir}/foo"             | grep -q '^bar$'; }
+  symtag     -c "${symtagrc}" -f "${test_dir}/foo"             | grep -q '^fubar$'
+  symtag     -c "${symtagrc}" -f "${test_dir}/foo"             | grep -q '^foobar$'
+  symtag     -c "${symtagrc}" -f "${test_dir}/bar"
+  ! { symtag -c "${symtagrc}" -f "${test_dir}/bar"             | grep -q '^foo$'; }
+  symtag     -c "${symtagrc}" -f "${test_dir}/bar"             | grep -q '^bar$'
+  symtag     -c "${symtagrc}" -f "${test_dir}/bar"             | grep -q '^fubar$'
+  symtag     -c "${symtagrc}" -f "${test_dir}/bar"             | grep -q '^foobar$'
+  symtag     -c "${symtagrc}" -f "${test_dir}/unindexed"
+  test '' == "$(symtag -c "${symtagrc}" -f "${test_dir}/unindexed")"
+  symtag     -c "${symtagrc}" -f "${test_dir}/nonexistent"
+  test '' == "$(symtag -c "${symtagrc}" -f "${test_dir}/nonexistent")"
 EOF
 
 echo "Success:  ${success_count}/${test_count}"

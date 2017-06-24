@@ -231,7 +231,7 @@ function dump_files {
   FILE_TAGS=()
   for FILE in "${FILES_TO_DUMP[@]}"; do
     NAME="$(echo "${FILE}" | unpath)" || fail
-    PATH_TO_HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}")" || fail
+    PATH_TO_HASH="$(readlink "${SYMTAGDIR}/hash_by_name/${NAME}")" || continue
     HASH="$(echo "${PATH_TO_HASH}" | unpath)"
 
     NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
