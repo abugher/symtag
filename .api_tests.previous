@@ -47,3 +47,4 @@ symtag     -c "${symtagrc}" -f "${test_dir}/unindexed"
 test '' == "$(symtag -c "${symtagrc}" -f "${test_dir}/unindexed")"
 symtag     -c "${symtagrc}" -f "${test_dir}/nonexistent"
 test '' == "$(symtag -c "${symtagrc}" -f "${test_dir}/nonexistent")"
+true
