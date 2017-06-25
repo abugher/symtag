@@ -73,5 +73,4 @@ review
 
 tests
 
-  Test functionality.
-```
+  Execute each line of api_tests as a test, and report pass/fail tallies.
