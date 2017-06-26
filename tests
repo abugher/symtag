@@ -20,7 +20,7 @@ echo bar > "${test_dir}/bar"
 echo not_indexed > "${test_dir}/not_indexed"
 echo other_foo > "${test_dir}/other/foo"
 
-while read command; do
+cat api_tests.d/* | while read command; do
   let test_count++
   if eval "${command}" >/dev/null 2>&1; then
     #echo "Pass:  ${test_count}"
@@ -29,7 +29,7 @@ while read command; do
     echo "Fail:  ${test_count}"
     let failure_count++
   fi
-done < api_tests
+done 
 
 echo "Success:  ${success_count}/${test_count}"
 echo "Failures: ${failure_count}/${test_count}"

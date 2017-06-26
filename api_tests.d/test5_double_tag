@@ -1,0 +1,10 @@
+symtag -c "${symtagrc}" "${test_dir}"/{foo,bar} -t foobar -t fubar
+test '../../path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730' == "$(readlink "${symtagdir}/hash_by_tag/foobar/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
+test '../../path_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730' == "$(readlink "${symtagdir}/hash_by_tag/fubar/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730")"
+test '../../hash_by_tag/foobar' == "$(readlink "${symtagdir}/tag_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730/foobar")"
+test '../../hash_by_tag/fubar' == "$(readlink "${symtagdir}/tag_by_hash/7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730/fubar")"
+test '../../path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c' == "$(readlink "${symtagdir}/hash_by_tag/foobar/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
+test '../../path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c' == "$(readlink "${symtagdir}/hash_by_tag/fubar/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
+test '../../hash_by_tag/foobar' == "$(readlink "${symtagdir}/tag_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c/foobar")"
+test '../../hash_by_tag/fubar' == "$(readlink "${symtagdir}/tag_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c/fubar")"
+

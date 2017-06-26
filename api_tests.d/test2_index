@@ -1,0 +1,5 @@
+symtag -c "${symtagrc}" "${test_dir}/foo"
+test '../../foo' == "$(readlink "${symtagdir}/path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
+test '../path_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c' == "$(readlink "${symtagdir}/hash_by_name/foo")"
+test '../hash_by_name/foo' == "$(readlink "${symtagdir}/name_by_hash/b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c")"
+
