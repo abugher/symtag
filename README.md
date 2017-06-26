@@ -31,7 +31,7 @@ symtag path ...
   "Act on the file at this path.  If it is not known, index it.  Give it the
   file name element of this path as its name."
 
-symtag path    -t tag -t tag
+symtag path -t tag -t tag
 
   "Associate the file with these tags."
 
