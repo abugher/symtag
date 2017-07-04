@@ -20,16 +20,31 @@ echo bar > "${test_dir}/bar"
 echo not_indexed > "${test_dir}/not_indexed"
 echo other_foo > "${test_dir}/other/foo"
 
-cat api_tests.d/* | while read command; do
+for t in api_tests.d/*; do
+  echo "${t}"
   let test_count++
-  if eval "${command}" >/dev/null 2>&1; then
-    #echo "Pass:  ${test_count}"
+  sc=0
+  fc=0
+  tc=0
+  while read command; do
+    let tc++
+    if eval "${command}" >/dev/null 2>&1; then
+      #echo "Pass:  ${test_count}"
+      let sc++
+    else
+      echo "Fail:  ${test_count}"
+      let fc++
+    fi
+  done < "${t}"
+  if test '0' == "${fc}"; then
     let success_count++
   else
-    echo "Fail:  ${test_count}"
     let failure_count++
   fi
-done 
+  echo "Success:  ${sc}/${tc}"
+  echo "Failures: ${fc}/${tc}"
+done
 
+echo "total"
 echo "Success:  ${success_count}/${test_count}"
 echo "Failures: ${failure_count}/${test_count}"
