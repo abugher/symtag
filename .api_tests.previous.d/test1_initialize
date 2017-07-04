@@ -1,0 +1,3 @@
+symtag -c "${symtagrc}"
+ls -d "${symtagdir}"/{path_by_hash,hash_by_name,hash_by_tag,name_by_hash,tag_by_hash}
+

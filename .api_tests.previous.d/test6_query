@@ -1,0 +1,14 @@
+symtag     -c "${symtagrc}" -o name -q 'foobar'               | grep -q '^foo$'
+symtag     -c "${symtagrc}" -o name -q 'foobar'               | grep -q '^bar$'
+symtag     -c "${symtagrc}" -o name -q 'fubar'                | grep -q '^foo$'
+symtag     -c "${symtagrc}" -o name -q 'fubar'                | grep -q '^bar$'
+symtag     -c "${symtagrc}" -o name -q 'bar'                  | grep -q '^bar$'
+! { symtag -c "${symtagrc}" -o name -q 'bar'                  | grep -q '^foo$'; }
+symtag     -c "${symtagrc}" -o name -q 'fubar NOT bar'        | grep -q '^foo$'
+! { symtag -c "${symtagrc}" -o name -q 'fubar NOT bar'        | grep -q '^bar$'; }
+symtag     -c "${symtagrc}" -o name -q 'fubar AND bar'        | grep -q '^bar$'
+! { symtag -c "${symtagrc}" -o name -q 'fubar AND bar'        | grep -q '^foo$'; }
+symtag     -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^bar$'
+! { symtag -c "${symtagrc}" -o name -q 'foo OR bar'           | grep -q '^foo$'; }
+symtag     -c "${symtagrc}" -o hash -q 'bar'                  | grep -qE '^[a-z0-9]{64,64}$'
+
