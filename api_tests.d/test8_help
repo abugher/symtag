@@ -1,0 +1,3 @@
+symtag -h               > "${test_dir}/help_text"
+grep -v '```' README.md > "${test_dir}/readme_text"
+diff                      "${test_dir}/help_text"       "${test_dir}/readme_text"

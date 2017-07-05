@@ -22,6 +22,10 @@ Directory naming conventions:
   hash:         sha256sum of file
 
 
+symtag -h
+
+  "Output the help text."
+
 symtag -c path ...
 
   "Instead of ~/.symtagrc, use this configuration file."
@@ -74,3 +78,4 @@ review
 tests
 
   Execute each line of api_tests as a test, and report pass/fail tallies.
+```
