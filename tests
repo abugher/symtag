@@ -21,6 +21,9 @@ echo not_indexed > "${test_dir}/not_indexed"
 echo other_foo > "${test_dir}/other/foo"
 
 for t in api_tests.d/*; do
+  if test 'api_tests.d/*' == "${t}"; then
+    continue
+  fi
   echo "${t}"
   let test_count++
   sc=0
